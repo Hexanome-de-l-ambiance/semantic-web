@@ -13,6 +13,7 @@ PREFIX dct: <http://purl.org/dc/terms/>
 SELECT ?dish ?description
 WHERE {
     ?dish dct:subject dbc:French_cuisine.
+    ?dish a dbo:Food.
     OPTIONAL { ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }
 }
 LIMIT 100
@@ -35,6 +36,7 @@ def get_random_french_dish():
 
     SELECT ?dish
     WHERE {
+        ?dish a dbo:Food.
         ?dish dct:subject dbc:French_cuisine.
     }
     ORDER BY RAND()
@@ -64,6 +66,7 @@ def search_french_dishes(search_term):
     SELECT ?dish ?description
     WHERE {{
         ?dish dct:subject dbc:French_cuisine.
+        ?dish a dbo:Food.
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
         FILTER regex(str(?dish), "{safe_search_term}", "i")
     }}
