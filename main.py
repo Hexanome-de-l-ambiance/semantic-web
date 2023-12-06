@@ -2,7 +2,7 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 
 
-def get_french_dishes():
+def get_list_french_dishes():
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
     query = """
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -24,6 +24,29 @@ LIMIT 100
 
     dishes = [result["dish"]["value"] for result in results["results"]["bindings"]]
     return dishes
+
+
+def get_random_french_dish():
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    query = """
+    PREFIX dbr: <http://dbpedia.org/resource/>
+    PREFIX dbc: <http://dbpedia.org/resource/Category:>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?dish
+    WHERE {
+        ?dish dct:subject dbc:French_cuisine.
+    }
+    ORDER BY RAND()
+    LIMIT 1
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    dish = results["results"]["bindings"][0]["dish"]["value"] if results["results"]["bindings"] else None
+    return dish
 
 
 def search_french_dishes(search_term):
