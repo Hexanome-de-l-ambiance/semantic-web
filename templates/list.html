@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>French Dishes</h1>
+    <ul>
+        {% for dish in dishes %}
+        <li><a href="{{ dish }}">{{ dish }}</a></li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
