@@ -1,0 +1,8 @@
+.region {
+    fill: #cccccc; /* Default color */
+    transition: fill 0.3s; /* Smooth transition for hover effect */
+}
+
+.region:hover {
+    fill: #aaaaaa; /* Color change on hover */
+}
