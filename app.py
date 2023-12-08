@@ -29,5 +29,12 @@ def random():
     return render_template('random.html', dish=dish)
 
 
+@app.route('/region', methods=['GET'])
+def region():
+    region_name = request.args.get('regionName', '')
+    dishes = get_french_dishes_by_region(region_name)
+    return render_template('region.html', dishes=dishes)
+
+
 if __name__ == '__main__':
     app.run()
