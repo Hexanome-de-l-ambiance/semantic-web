@@ -1,32 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Results</title>
     <style>
-        /* Add some basic styles for images */
+        /* Add some basic styles for table and images */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
         .dish-image {
-            max-width: 200px;
+            max-width: 100px;
             height: auto;
         }
     </style>
 </head>
+
 <body>
     <h1>Search Results</h1>
-    <ul>
-        {% for dish in dishes %}
-        <li>
-
-            <a href="{{ dish.link }}">{{ dish.link }}</a>
-            <h2>{{ dish.name }}</h2>
-            <p>{{ dish.description }}</p>
-            {% if dish.image %}
-                <img class="dish-image" src="{{ dish.image }}" alt="{{ dish.name }} Image">
-            {% else %}
-                <p>No image available</p>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Image</th>
+                <th>Description</th>
+                <th>Ingredients</th> <!-- New column for Ingredients -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for dish in dishes %}
+            <tr>
+                <td>{{ dish.name }}</td>
+                <td>
+                    {% if dish.image %}
+                    <img class="dish-image" src="{{ dish.image }}" alt="{{ dish.name }} Image">
+                    {% else %}
+                    <p>No image available</p>
+                    {% endif %}
+                </td>
+                <td>{{ dish.description }}</td>
+                <td>
+                    <ul> <!-- List of ingredients -->
+                        {% for ingredient in dish.ingredients %}
+                        <li>
+                            <a href="{{ ingredient.link }}">{{ ingredient.name }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
+
 </html>

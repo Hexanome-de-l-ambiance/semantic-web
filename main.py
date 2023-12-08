@@ -10,28 +10,45 @@ def get_list_french_dishes():
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?image
+    SELECT ?dish ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {
-        ?dish dct:subject dbc:French_cuisine;
-        rdfs:label ?name;
-        a dbo:Food;
-        dbo:thumbnail ?image.
-
-        
-
+        ?dish dct:subject dbc:French_cuisine.
+        ?dish rdfs:label ?name.
+        ?dish a dbo:Food.
+        ?dish dbo:thumbnail ?image.
         FILTER(LANG(?name) = "en")
+
+        # Retrieve ingredients and their links
+        OPTIONAL {{ 
+            ?dish dbo:ingredient ?ingredient.
+            ?ingredient rdfs:label ?ingredientName.
+            FILTER(LANG(?ingredientName) = "en")
+        }}
+
+        OPTIONAL {{
+            ?dish dbp:mainIngredient ?mainIngredient.
+            FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
+        }}
     }
     LIMIT 100
+
 
     """
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
-    dishes = [{'link': result["dish"]["value"],
-                'name': result["name"]["value"],
-               'image': result["image"]["value"] if "image" in result else ""
-               } for result in results["results"]["bindings"]]
+    dishes = []
+    for result in results["results"]["bindings"]:
+        dish_info = {
+            'name': result["name"]["value"],
+            'link': result["dish"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+            'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
+            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
+        }
+
+        dishes.append(dish_info)
     return dishes
 
 
@@ -75,7 +92,7 @@ def search_french_dishes(search_term):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?description ?image
+    SELECT ?dish ?name ?description ?image ?ingredient
     WHERE {{
         ?dish dct:subject dbc:French_cuisine;
         rdfs:label ?name;
@@ -85,6 +102,14 @@ def search_french_dishes(search_term):
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
         FILTER regex(str(?dish), "{safe_search_term}", "i")
+
+        OPTIONAL {{         
+            ?dish dbo:ingredient ?ingredientResource.
+            ?ingredientResource rdfs:label ?ingredient.
+            FILTER (LANG(?ingredient) = 'en')
+        }}
+
+
     }}
     LIMIT 100
     """
@@ -93,11 +118,24 @@ def search_french_dishes(search_term):
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
-    dishes = [{'link': result["dish"]["value"],
-                'name': result["name"]["value"],
-               'description': result["description"]["value"] if "description" in result else "",
-               'image': result["image"]["value"] if "image" in result else ""
-               } for result in results["results"]["bindings"]]
+    dishes = []
+    for result in results["results"]["bindings"]:
+        dish_info = {
+            'name': result["name"]["value"],
+            'description': result["description"]["value"] if "description" in result else "",
+            'image': result["image"]["value"] if "image" in result else "",
+            'ingredients': []  # List to store ingredients
+        }
+
+        # Extract and add ingredients to the dish's ingredients list
+        if "ingredient" in result:
+            dish_info['ingredients'].append({
+                'name': result["ingredient"]["value"],
+                'link': result["ingredientResource"]["value"]  # Link to the ingredient
+            })
+
+        dishes.append(dish_info)
+        
     return dishes
 
 # Example usage
