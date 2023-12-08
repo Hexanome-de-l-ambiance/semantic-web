@@ -3,17 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Results</title>
+    <style>
+        /* Add some basic styles for images */
+        .dish-image {
+            max-width: 200px;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
     <h1>Search Results</h1>
     <ul>
-    {% for dish in dishes %}
-    <li>
-        <a href="{{ dish.name }}">{{ dish.name }}</a>
-        <p>{{ dish.description }}</p>
-    </li>
-    {% endfor %}
-</ul>
+        {% for dish in dishes %}
+        <li>
 
+            <a href="{{ dish.link }}">{{ dish.link }}</a>
+            <h2>{{ dish.name }}</h2>
+            <p>{{ dish.description }}</p>
+            {% if dish.image %}
+                <img class="dish-image" src="{{ dish.image }}" alt="{{ dish.name }} Image">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>

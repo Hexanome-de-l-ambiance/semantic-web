@@ -2,11 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>I'm feeling lucky</title>
+    <title>Results</title>
+    <style>
+        /* Add some basic styles for images */
+        .dish-image {
+            max-width: 200px;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>A random dish</h1>
-    <li><a href="{{ dish }}">{{ dish }}</a></li>
+    <h1>Search Results</h1>
+    <ul>
+        {% for dish in dishes %}
+        <li>
 
+            <a href="{{ dish.link }}">{{ dish.link }}</a>
+            <h2>{{ dish.name }}</h2>
+            {% if dish.image %}
+                <img class="dish-image" src="{{ dish.image }}" alt="{{ dish.name }} Image">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
