@@ -78,7 +78,7 @@
                         {% for dish in portion1 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            <h3>{{ dish.name }}</h3>
+                            <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
                             <p>Ingredients : </p><br>
@@ -97,7 +97,7 @@
                         {% for dish in portion2 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            <h3>{{ dish.name }}</h3>
+                            <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
                             <p>Ingredients : </p><br>
@@ -117,7 +117,7 @@
                         {% for dish in portion3 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            <h3>{{ dish.name }}</h3>
+                            <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
                             <p>Ingredients : </p><br>
@@ -136,7 +136,7 @@
                         {% for dish in portion4 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            <h3>{{ dish.name }}</h3>
+                            <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
                             <p>Ingredients : </p><br>

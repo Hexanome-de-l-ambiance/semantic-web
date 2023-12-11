@@ -30,6 +30,12 @@ def random():
     dishes = get_random_french_dish()
     return render_template('random.html', dishes=dishes)
 
+@app.route('/about_cuisine', methods=['GET'])
+def about_cuisine():
+    dish_name = request.args.get('dish_name', '')
+    print(dish_name)
+    dish = get_dish_by_name(dish_name)
+    return render_template('about_cuisine.html', dish=dish)
 
 if __name__ == '__main__':
     app.run()
