@@ -57,27 +57,49 @@ def get_random_french_dish():
     query = """
     PREFIX dbr: <http://dbpedia.org/resource/>
     PREFIX dbc: <http://dbpedia.org/resource/Category:>
+    PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?image
+    SELECT ?dish ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {
-        ?dish dct:subject dbc:French_cuisine;
-        rdfs:label ?name;
-        a dbo:Food;
-        dbo:thumbnail ?image.
-
+        ?dish dct:subject dbc:French_cuisine.
+        ?dish rdfs:label ?name.
+        ?dish a dbo:Food.
+        ?dish dbo:thumbnail ?image.
         FILTER(LANG(?name) = "en")
+
+        # Retrieve ingredients and their links
+        OPTIONAL {{ 
+            ?dish dbo:ingredient ?ingredient.
+            ?ingredient rdfs:label ?ingredientName.
+            FILTER(LANG(?ingredientName) = "en")
+        }}
+
+        OPTIONAL {{
+            ?dish dbp:mainIngredient ?mainIngredient.
+            FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
+        }}
     }
     ORDER BY RAND()
-    LIMIT 1
-    """
+    LIMIT 5
 
+    """
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
-    dish = results["results"]["bindings"][0]["dish"]["value"] if results["results"]["bindings"] else None
-    return dish
+    dishes = []
+    for result in results["results"]["bindings"]:
+        dish_info = {
+            'name': result["name"]["value"],
+            'link': result["dish"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+            'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
+            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
+        }
+
+        dishes.append(dish_info)
+    return dishes
 
 
 def search_french_dishes(search_term):
@@ -92,7 +114,7 @@ def search_french_dishes(search_term):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?description ?image ?ingredient
+    SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {{
         ?dish dct:subject dbc:French_cuisine;
         rdfs:label ?name;
@@ -103,10 +125,16 @@ def search_french_dishes(search_term):
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
         FILTER regex(str(?dish), "{safe_search_term}", "i")
 
-        OPTIONAL {{         
-            ?dish dbo:ingredient ?ingredientResource.
-            ?ingredientResource rdfs:label ?ingredient.
-            FILTER (LANG(?ingredient) = 'en')
+        # Retrieve ingredients and their links
+        OPTIONAL {{ 
+            ?dish dbo:ingredient ?ingredient.
+            ?ingredient rdfs:label ?ingredientName.
+            FILTER(LANG(?ingredientName) = "en")
+        }}
+
+        OPTIONAL {{
+            ?dish dbp:mainIngredient ?mainIngredient.
+            FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
         }}
 
 
@@ -122,22 +150,28 @@ def search_french_dishes(search_term):
     for result in results["results"]["bindings"]:
         dish_info = {
             'name': result["name"]["value"],
-            'description': result["description"]["value"] if "description" in result else "",
+            'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
-            'ingredients': []  # List to store ingredients
+            'description': result["description"]["value"] if "description" in result else '',
+            'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
+            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
         }
 
-        # Extract and add ingredients to the dish's ingredients list
-        if "ingredient" in result:
-            dish_info['ingredients'].append({
-                'name': result["ingredient"]["value"],
-                'link': result["ingredientResource"]["value"]  # Link to the ingredient
-            })
-
         dishes.append(dish_info)
-        
     return dishes
 
 # Example usage
 # french_dishes = get_french_dishes()
 # print(french_dishes)
+def split_list_into_portions(dishes):
+    # Assuming 'dishes' is the list of retrieved dishes
+    total_dishes = len(dishes)
+    portion_size = total_dishes // 4  # Divide the list into 4 portions
+
+    portions = [dishes[i * portion_size: (i + 1) * portion_size] for i in range(4)]
+    
+    # Add any remaining dishes to the last portion
+    for i in range(total_dishes % 4):
+        portions[i].append(dishes[portion_size * 4 + i])
+
+    return portions

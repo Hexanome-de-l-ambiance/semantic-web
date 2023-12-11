@@ -9,24 +9,26 @@ def hello_world():
     return render_template('index.html')
 
 
-@app.route('/list', methods=['Post'])
+@app.route('/list', methods=['GET'])
 def list_all():
-    dishes = get_list_french_dishes()
-    return render_template('list.html', dishes=dishes)
+    all_dishes = get_list_french_dishes()
+    portions = split_list_into_portions(all_dishes)
+    return render_template('list.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
 
 @app.route('/search', methods=['GET'])
 def search():
     search_query = request.args.get('search_query', '')
     print(search_query)
-    dishes = search_french_dishes(search_query)
-    return render_template('results.html', dishes=dishes)
+    all_dishes = search_french_dishes(search_query)
+    portions = split_list_into_portions(all_dishes)
+    return render_template('results.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
 
-@app.route('/random', methods=['POST'])
+@app.route('/random', methods=['GET'])
 def random():
-    dish = get_random_french_dish()
-    return render_template('random.html', dish=dish)
+    dishes = get_random_french_dish()
+    return render_template('random.html', dishes=dishes)
 
 
 if __name__ == '__main__':

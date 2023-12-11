@@ -1,31 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Results</title>
     <style>
-        /* Add some basic styles for images */
+        /* Add some basic styles for table and images */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
         .dish-image {
-            max-width: 200px;
+            max-width: 100px;
             height: auto;
         }
     </style>
 </head>
+
 <body>
     <h1>Search Results</h1>
-    <ul>
-        {% for dish in dishes %}
-        <li>
-
-            <a href="{{ dish.link }}">{{ dish.link }}</a>
-            <h2>{{ dish.name }}</h2>
-            {% if dish.image %}
-                <img class="dish-image" src="{{ dish.image }}" alt="{{ dish.name }} Image">
-            {% else %}
-                <p>No image available</p>
-            {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Image</th>
+                <th>Link</th>
+                <th>Ingredients</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dish in dishes %}
+            <tr>
+                <td>{{ dish.name }}</td>
+                <td>
+                    {% if dish.image %}
+                    <img class="dish-image" src="{{ dish.image }}" alt="{{ dish.name }} Image">
+                    {% else %}
+                    <p>No image available</p>
+                    {% endif %}
+                </td>
+                <td><a href="{{ dish.link }}">{{ dish.link }}</a></td>
+                <td>
+                    {% if dish.mainIngredient %}
+                    {{dish.mainIngredient}}
+                    {% else %}
+                    {% for ingredient_info in dish.ingredients %}
+                    {% set parts = ingredient_info.split(' - ') %}
+                    <a href="{{ parts[1] }}">{{ parts[0] }}</a><br>
+                    {% endfor %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
+
 </html>

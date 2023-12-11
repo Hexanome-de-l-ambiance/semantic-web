@@ -10,22 +10,22 @@
 	<link href="https://fonts.googleapis.com/css?family=Satisfy" rel="stylesheet">
 
 	<!-- Animate.css -->
-	<link rel="stylesheet" href="static/css/animate.css">
+	<link rel="stylesheet" href="../static/css/animate.css">
 	<!-- Icomoon Icon Fonts-->
-	<link rel="stylesheet" href="static/css/icomoon.css">
+	<link rel="stylesheet" href="../static/css/icomoon.css">
 	<!-- Bootstrap  -->
-	<link rel="stylesheet" href="static/css/bootstrap.css">
+	<link rel="stylesheet" href="../static/css/bootstrap.css">
 	<!-- Flexslider  -->
-	<link rel="stylesheet" href="static/css/flexslider.css">
+	<link rel="stylesheet" href="../static/css/flexslider.css">
 
 	<!-- Theme style  -->
-	<link rel="stylesheet" href="static/css/style.css">
+	<link rel="stylesheet" href="../static/css/style.css">
 
 	<!-- Modernizr JS -->
-	<script src="js/modernizr-2.6.2.min.js"></script>
+	<script src="../static/js/modernizr-2.6.2.min.js"></script>
 	<!-- FOR IE9 below -->
 	<!--[if lt IE 9]>
-	<script src="js/respond.min.js"></script>
+	<script src="../static/js/respond.min.js"></script>
 	<![endif]-->
 </head>
 
@@ -39,23 +39,13 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-xs-12 text-center logo-wrap">
-						<div id="fh5co-logo"><a href="index.html">French cuisine<span></span></a></div>
+						<div id="fh5co-logo"><a href="/">French cuisine<span></span></a></div>
 					</div>
 					<div class="col-xs-12 text-center menu-1 menu-wrap">
 						<ul>
-							<li class="active"><a href="index.html">Home</a></li>
-							<li><a href="menu.html">Menu</a></li>
-							<li class="has-dropdown">
-								<a href="gallery.html">Gallery</a>
-								<ul class="dropdown">
-									<li><a href="#">Events</a></li>
-									<li><a href="#">Food</a></li>
-									<li><a href="#">Coffees</a></li>
-								</ul>
-							</li>
-							<li><a href="reservation.html">Reservation</a></li>
-							<li><a href="about.html">About</a></li>
-							<li><a href="contact.html">Contact</a></li>
+							<li class="active"><a href="/">Home</a></li>
+							<li><a href="/list">List</a></li>
+							<li><a href="/random">Random dish</a></li>
 						</ul>
 					</div>
 				</div>
@@ -65,14 +55,14 @@
 		</nav>
 
 		<header id="fh5co-header" class="fh5co-cover js-fullheight" role="banner"
-			style="background-image: url(images/hero_1.jpeg);" data-stellar-background-ratio="0.5">
+			style="background-image: url(../static/images/hero_1.jpeg);" data-stellar-background-ratio="0.5">
 			<div class="overlay"></div>
 			<div class="container">
 				<div class="row">
 					<div class="col-md-12 text-center">
 						<div class="display-t js-fullheight">
 							<div class="display-tc js-fullheight animate-box" data-animate-effect="fadeIn">
-								<h1>Search a french cuisine</h1>
+								<h1>Search for a french cuisine</h1>
 							</div>
 						</div>
 					</div>
@@ -98,19 +88,20 @@
 						</div>
 					</div>
 
-					<div class="row form-group">
-						<div class="col-md-12">
-							<label for="name">Your Name</label>
-							<input type="text" class="form-control" id="name">
+					<form action="/search" method="get">
+						<div class="row form-group">
+							<div class="col-md-12">
+								<label for="name">French Cuisine Name</label>
+								<input type="text" class="form-control" id="search_query" name="search_query" placeholder="Search for a dish...">
+							</div>
 						</div>
-					</div>
 
-					<div class="row form-group">
-						<div class="col-md-12">
-							<input type="submit" class="btn btn-primary btn-outline btn-lg" value="Submit Form">
+						<div class="row form-group">
+							<div class="col-md-12">
+								<input type="submit" class="btn btn-primary btn-outline btn-lg" value="Search">
+							</div>
 						</div>
-					</div>
-
+					</form>
 				</div>
 			</div>
 		</div>
@@ -604,19 +595,19 @@
 
 		</script>
 		<!-- jQuery -->
-		<script src="js/jquery.min.js"></script>
+		<script src="../static/js/jquery.min.js"></script>
 		<!-- jQuery Easing -->
-		<script src="js/jquery.easing.1.3.js"></script>
+		<script src="../static/js/jquery.easing.1.3.js"></script>
 		<!-- Bootstrap -->
-		<script src="js/bootstrap.min.js"></script>
+		<script src="../static/js/bootstrap.min.js"></script>
 		<!-- Waypoints -->
-		<script src="js/jquery.waypoints.min.js"></script>
+		<script src="../static/js/jquery.waypoints.min.js"></script>
 		<!-- Waypoints -->
-		<script src="js/jquery.stellar.min.js"></script>
+		<script src="../static/js/jquery.stellar.min.js"></script>
 		<!-- Flexslider -->
-		<script src="js/jquery.flexslider-min.js"></script>
+		<script src="../static/js/jquery.flexslider-min.js"></script>
 		<!-- Main -->
-		<script src="js/main.js"></script>
+		<script src="../static/js/main.js"></script>
 
 </body>
 
