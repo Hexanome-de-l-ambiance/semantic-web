@@ -236,3 +236,39 @@ def split_list_into_portions(dishes):
         portions[i].append(dishes[portion_size * 4 + i])
 
     return portions
+
+
+
+ # partie sur l'autocomplétion
+def autocomplete_french_dishes(search_term):
+    if len(search_term) < 3:
+        # Si la chaîne de recherche a moins de trois caractères, retourner une liste vide
+        return []
+    else:
+        sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+        safe_search_term = re.escape(search_term)
+
+        query = f"""
+        PREFIX dbr: <http://dbpedia.org/resource/>
+        PREFIX dbc: <http://dbpedia.org/resource/Category:>
+        PREFIX dbo: <http://dbpedia.org/ontology/>
+        PREFIX dct: <http://purl.org/dc/terms/>
+
+        SELECT DISTINCT ?name
+        WHERE {{
+            ?dish dct:subject dbc:French_cuisine;
+            rdfs:label ?name;
+            a dbo:Food.
+
+            FILTER(LANG(?name) = "en")
+            FILTER regex(str(?name), "^{safe_search_term}", "i")
+        }}
+        LIMIT 10
+        """
+        sparql.setQuery(query)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+
+        suggestions = [result["name"]["value"] for result in results["results"]["bindings"]]
+        return suggestions
+
