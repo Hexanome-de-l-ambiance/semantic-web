@@ -62,7 +62,7 @@
                     <div class="col-md-12 text-center">
                         <div class="display-t js-fullheight">
                             <div class="display-tc js-fullheight animate-box" data-animate-effect="fadeIn">
-                                <h1>Information cuisine</h1>
+                                <h1>French restaurant {{restaurant.name}}</h1>
                             </div>
                         </div>
                     </div>
@@ -74,12 +74,12 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-6 col-md-push-1 img-wrap animate-box" data-animate-effect="fadeInLeft">
-                        <img src="{{ dish.image }}" alt="{{ dish.name }} Image">
+                        <img src="{{ restaurant.image }}" alt="{{ restaurant.name }} Image">
                     </div>
                     <div class="col-md-5 col-md-push-1 animate-box">
                         <div class="section-heading">
                             <h2>Description</h2>
-                            <p>{{ dish.description }}</p>
+                            <p>{{ restaurant.description }}</p>
                         </div>
                     </div>
                 </div>
@@ -89,26 +89,11 @@
         <div id="fh5co-featured-testimony" class="fh5co-section">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6 fh5co-heading">
-                        <h2>Ingredients</h2>
-                        <div class="row">
-                            <div class="col-md-6">
-                                {% if dish.mainIngredient %}
-                                <p>{{dish.mainIngredient}}</p>
-                                {% else %}
-                                {% for ingredient_info in dish.ingredients %}
-                                {% set parts = ingredient_info.split(' - ') %}
-                                <p><a href="{{ parts[1] }}">{{ parts[0] }}</a></p>
-                                {% endfor %}
-                                {% endif %}           
-                            </div>                 
-                        </div>
-                    </div>
-                    <div class="col-md-6 fh5co-heading">
+                    <div class="col-md-12 fh5co-heading">
                         <h2>Link dbpedia</h2>
                         <div class="row">
                             <div class="col-md-6">
-                                <p><a href="{{ dish.link }}">{{ dish.name }}</a></p>
+                                <p><a href="{{ restaurant.link }}">{{ restaurant.name }}</a></p>
                             </div>                 
                         </div>
                     </div>

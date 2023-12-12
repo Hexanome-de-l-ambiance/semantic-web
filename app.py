@@ -37,19 +37,19 @@ def about_cuisine():
 
 @app.route('/about_ingredient', methods=['GET'])
 def about_ingredient():
-    ingredient_name = request.args.get('ingredient_link', '')
+    ingredient_name = request.args.get('ingredient_link', 'https://dbpedia.org/page/French_fries')
     ingredient = get_ingredient_by_link(ingredient_name)
     return render_template('about_ingredient.html', ingredient=ingredient)
 
 @app.route('/about_chef', methods=['GET'])
 def about_chef():
-    chef_name = request.args.get('chef_link', '')
+    chef_name = request.args.get('chef_link', 'http://dbpedia.org/resource/Philippe_Etchebest')
     chef = get_chef_by_link(chef_name)
     return render_template('about_chef.html', chef=chef)
 
 @app.route('/about_restaurant', methods=['GET'])
 def about_restaurant():
-    restaurant_name = request.args.get('restaurant_link', '')
+    restaurant_name = request.args.get('restaurant_link', 'https://dbpedia.org/page/Le_Jules_Verne')
     restaurant = get_restaurant_by_link(restaurant_name)
     return render_template('about_restaurant.html', restaurant=restaurant)
 

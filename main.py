@@ -3,7 +3,7 @@ import re
 import urllib.parse
 
 categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries",
-              "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews"]    
+              "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews"]
 
 
 def get_list_french_dishes():
@@ -48,7 +48,8 @@ def get_list_french_dishes():
             'name': result["name"]["value"],
             'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
-            'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
+            # List to store ingredients
+            'ingredients': result["ingredients"]["value"].split(", "),
             'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
         }
 
@@ -101,7 +102,8 @@ def get_random_french_dish():
             'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
-            'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
+            # List to store ingredients
+            'ingredients': result["ingredients"]["value"].split(", "),
             'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
         }
 
@@ -109,7 +111,7 @@ def get_random_french_dish():
     return dishes[0]
 
 
-def search_about_french_cuisine(search_term : str, criteria : str = "all"):
+def search_about_french_cuisine(search_term: str, criteria: str = "all"):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
@@ -117,9 +119,7 @@ def search_about_french_cuisine(search_term : str, criteria : str = "all"):
 
     query = f"""
     """
-    
-    
-    
+
 
 def search_french_dishes(search_term):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
@@ -172,12 +172,14 @@ def search_french_dishes(search_term):
             'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
-            'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
+            # List to store ingredients
+            'ingredients': result["ingredients"]["value"].split(", "),
             'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
         }
 
         dishes.append(dish_info)
     return dishes
+
 
 def get_dish_by_name(dish_name):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
@@ -189,7 +191,6 @@ def get_dish_by_name(dish_name):
     else:
         name = name
     safe_search_term = re.escape(name)
-    
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -236,41 +237,159 @@ def get_dish_by_name(dish_name):
             'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
-            'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
+            # List to store ingredients
+            'ingredients': result["ingredients"]["value"].split(", "),
             'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
         }
 
         dishes.append(dish_info)
     return dishes[0]
 
-def get_ingredient_by_link(ingredient_link):
-    pass
 
-def get_chef_by_link(chef_link):
-    pass
+def get_ingredient_by_link(ingredient_url):
+    # Extract the resource identifier from the DBpedia URL
+    resource_identifier = ingredient_url.rsplit('/', 1)[-1]
 
-def get_restaurant_by_link(restaurant_link):
-    pass
+    # SPARQL query to retrieve information about the dish
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?name ?description ?image
+    WHERE {{
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
+        a owl:Thing;
+        dbo:thumbnail ?image.
+
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+    }}
+    LIMIT 1
+    """
+
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
+        result = results["results"]["bindings"][0]
+
+        chef_info = {
+            'name': result["name"]["value"],
+            'link': ingredient_url,
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+        }
+
+        return chef_info
+    else:
+        return None
+
+
+def get_chef_by_link(chef_url):
+    # Extract the resource identifier from the DBpedia URL
+    resource_identifier = chef_url.rsplit('/', 1)[-1]
+
+    # SPARQL query to retrieve information about the dish
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?name ?description ?image
+    WHERE {{
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
+        a dbo:Person;
+        dbo:thumbnail ?image.
+
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+    }}
+    LIMIT 1
+    """
+
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
+        result = results["results"]["bindings"][0]
+
+        chef_info = {
+            'name': result["name"]["value"],
+            'link': chef_url,
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+        }
+
+        return chef_info
+    else:
+        return None
+
+
+def get_restaurant_by_link(restaurant_url):
+    # Extract the resource identifier from the DBpedia URL
+    resource_identifier = restaurant_url.rsplit('/', 1)[-1]
+
+    # SPARQL query to retrieve information about the dish
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?name ?description ?image
+    WHERE {{
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
+        a dbo:Restaurant;
+        dbo:thumbnail ?image.
+
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+    }}
+    LIMIT 1
+    """
+
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
+        result = results["results"]["bindings"][0]
+
+        chef_info = {
+            'name': result["name"]["value"],
+            'link': restaurant_url,
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+        }
+
+        return chef_info
+    else:
+        return None
 
 # Example usage
 # french_dishes = get_french_dishes()
 # print(french_dishes)
+
+
 def split_list_into_portions(dishes):
     # Assuming 'dishes' is the list of retrieved dishes
     total_dishes = len(dishes)
     portion_size = total_dishes // 4  # Divide the list into 4 portions
 
-    portions = [dishes[i * portion_size: (i + 1) * portion_size] for i in range(4)]
-    
+    portions = [
+        dishes[i * portion_size: (i + 1) * portion_size] for i in range(4)]
+
     # Add any remaining dishes to the last portion
     for i in range(total_dishes % 4):
         portions[i].append(dishes[portion_size * 4 + i])
 
     return portions
 
-
-
  # partie sur l'autocomplétion
+
+
 def autocomplete_french_dishes(search_term):
     if len(search_term) < 3:
         # Si la chaîne de recherche a moins de trois caractères, retourner une liste vide
@@ -300,8 +419,10 @@ def autocomplete_french_dishes(search_term):
         sparql.setReturnFormat(JSON)
         results = sparql.query().convert()
 
-        suggestions = [result["name"]["value"] for result in results["results"]["bindings"]]
+        suggestions = [result["name"]["value"]
+                       for result in results["results"]["bindings"]]
         return suggestions
+
 
 def get_dish_by_url(dbpedia_url):
     # Extract the resource identifier from the DBpedia URL
@@ -355,4 +476,3 @@ def get_dish_by_url(dbpedia_url):
         return dish_info
     else:
         return None
-
