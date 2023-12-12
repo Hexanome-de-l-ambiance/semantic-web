@@ -243,6 +243,15 @@ def get_dish_by_name(dish_name):
         dishes.append(dish_info)
     return dishes[0]
 
+def get_ingredient_by_link(ingredient_link):
+    pass
+
+def get_chef_by_link(chef_link):
+    pass
+
+def get_restaurant_by_link(restaurant_link):
+    pass
+
 # Example usage
 # french_dishes = get_french_dishes()
 # print(french_dishes)

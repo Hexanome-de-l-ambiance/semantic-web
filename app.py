@@ -35,5 +35,23 @@ def about_cuisine():
     dish = get_dish_by_name(dish_name)
     return render_template('about_cuisine.html', dish=dish)
 
+@app.route('/about_ingredient', methods=['GET'])
+def about_ingredient():
+    ingredient_name = request.args.get('ingredient_link', '')
+    ingredient = get_ingredient_by_link(ingredient_name)
+    return render_template('about_ingredient.html', ingredient=ingredient)
+
+@app.route('/about_chef', methods=['GET'])
+def about_chef():
+    chef_name = request.args.get('chef_link', '')
+    chef = get_chef_by_link(chef_name)
+    return render_template('about_chef.html', chef=chef)
+
+@app.route('/about_restaurant', methods=['GET'])
+def about_restaurant():
+    restaurant_name = request.args.get('restaurant_link', '')
+    restaurant = get_restaurant_by_link(restaurant_name)
+    return render_template('about_restaurant.html', restaurant=restaurant)
+
 if __name__ == '__main__':
     app.run()
