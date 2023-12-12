@@ -81,15 +81,6 @@
                             <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
-                            <p>Ingredients : </p><br>
-                            {% if dish.mainIngredient %}
-                            {{dish.mainIngredient}}
-                            {% else %}
-                            {% for ingredient_info in dish.ingredients %}
-                            {% set parts = ingredient_info.split(' - ') %}
-                            <a href="{{ parts[1] }}">{{ parts[0] }}</a><br>
-                            {% endfor %}
-                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
@@ -100,15 +91,6 @@
                             <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
-                            <p>Ingredients : </p><br>
-                            {% if dish.mainIngredient %}
-                            {{dish.mainIngredient}}
-                            {% else %}
-                            {% for ingredient_info in dish.ingredients %}
-                            {% set parts = ingredient_info.split(' - ') %}
-                            <a href="{{ parts[1] }}">{{ parts[0] }}</a><br>
-                            {% endfor %}
-                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
@@ -120,15 +102,6 @@
                             <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
-                            <p>Ingredients : </p><br>
-                            {% if dish.mainIngredient %}
-                            {{dish.mainIngredient}}
-                            {% else %}
-                            {% for ingredient_info in dish.ingredients %}
-                            {% set parts = ingredient_info.split(' - ') %}
-                            <a href="{{ parts[1] }}">{{ parts[0] }}</a><br>
-                            {% endfor %}
-                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
@@ -139,15 +112,6 @@
                             <h3><a href="/about_cuisine?dish_name={{ dish.link }}">{{ dish.name }}</a></h3>
                             <p> Description : </p>
                             <p>{{ dish.description }}</p>
-                            <p>Ingredients : </p><br>
-                            {% if dish.mainIngredient %}
-                            {{dish.mainIngredient}}
-                            {% else %}
-                            {% for ingredient_info in dish.ingredients %}
-                            {% set parts = ingredient_info.split(' - ') %}
-                            <a href="{{ parts[1] }}">{{ parts[0] }}</a><br>
-                            {% endfor %}
-                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>

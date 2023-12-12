@@ -61,13 +61,15 @@ def get_random_french_dish():
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?name ?image ?description (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {
         ?dish dct:subject dbc:French_cuisine.
         ?dish rdfs:label ?name.
         ?dish a dbo:Food.
         ?dish dbo:thumbnail ?image.
         FILTER(LANG(?name) = "en")
+
+        OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
 
         # Retrieve ingredients and their links
         OPTIONAL {{ 
@@ -82,7 +84,7 @@ def get_random_french_dish():
         }}
     }
     ORDER BY RAND()
-    LIMIT 5
+    LIMIT 1
 
     """
     sparql.setQuery(query)
@@ -95,12 +97,13 @@ def get_random_french_dish():
             'name': result["name"]["value"],
             'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
             'ingredients': result["ingredients"]["value"].split(", "),  # List to store ingredients
             'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
         }
 
         dishes.append(dish_info)
-    return dishes
+    return dishes[0]
 
 
 def search_french_dishes(search_term):
