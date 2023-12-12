@@ -53,5 +53,14 @@ def about_restaurant():
     restaurant = get_restaurant_by_link(restaurant_name)
     return render_template('about_restaurant.html', restaurant=restaurant)
 
+@app.route('/region', methods=['GET'])
+def region():
+    region_name = request.args.get('regionName', '')
+    print(region_name)
+    region = get_french_dishes_by_region(region_name)
+    print(region)
+    return render_template('region.html', region=region)
+
+
 if __name__ == '__main__':
     app.run()
