@@ -2,6 +2,9 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
 
+categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries",
+              "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews"]    
+
 
 def get_list_french_dishes():
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
@@ -105,6 +108,18 @@ def get_random_french_dish():
         dishes.append(dish_info)
     return dishes[0]
 
+
+def search_about_french_cuisine(search_term : str, criteria : str = "all"):
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+
+    # Sanitize the search term to prevent SPARQL injection
+    safe_search_term = re.escape(search_term)
+
+    query = f"""
+    """
+    
+    
+    
 
 def search_french_dishes(search_term):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
