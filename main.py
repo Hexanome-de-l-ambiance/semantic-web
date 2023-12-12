@@ -139,9 +139,8 @@ def search_french_dishes(search_term, categories):
         {{
             ?dish dct:subject dbc:{category};
             rdfs:label ?name;
-            dbo:thumbnail ?image.
+            dbo:thumbnail ?image;
             dbo:wikiPageID ?id.
-
 
             FILTER(LANG(?name) = "en")
             OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
@@ -193,6 +192,7 @@ def search_french_dishes(search_term, categories):
     LIMIT 100
     """
 
+    print(query)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     sparql.method = 'POST'  # Set the HTTP method to POST
