@@ -16,12 +16,13 @@ def get_list_french_dishes():
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?id ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {
         ?dish dct:subject dbc:French_cuisine.
         ?dish rdfs:label ?name.
         ?dish a dbo:Food.
-        ?dish dbo:thumbnail ?image.
+        ?dish dbo:thumbnail ?image;
+        dbo:wikiPageID ?id.
         FILTER(LANG(?name) = "en")
 
         # Retrieve ingredients and their links
@@ -49,6 +50,7 @@ def get_list_french_dishes():
         dish_info = {
             'name': result["name"]["value"],
             'link': result["dish"]["value"],
+            'id': result["id"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             # List to store ingredients
             'ingredients': result["ingredients"]["value"].split(", "),
@@ -137,12 +139,13 @@ def search_french_dishes(search_term):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?id ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {{
         ?dish dct:subject dbc:French_cuisine;
         rdfs:label ?name;
         a dbo:Food;
-        dbo:thumbnail ?image.
+        dbo:thumbnail ?image;
+        dbo:wikiPageID ?id.
 
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
@@ -203,15 +206,9 @@ def search_french_dishes(search_term):
     return dishes
 
 
-def get_dish_by_name(dish_name):
+def get_dish_by_id(dish_id):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
-
-    name = dish_name.rsplit('/', 1)[-1]
-    # Sanitize the search term to prevent SPARQL injection
-    normalized_search_term = unidecode(name)
-    # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.sub(r'\W+', '', normalized_search_term)
-
+    print(dish_id)
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
     PREFIX dbc: <http://dbpedia.org/resource/Category:>
@@ -223,29 +220,12 @@ def get_dish_by_name(dish_name):
         ?dish dct:subject dbc:French_cuisine;
         rdfs:label ?name;
         a dbo:Food;
-        dbo:thumbnail ?image.
+        dbo:thumbnail ?image;
+        dbo:wikiPageID ?id.
 
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
-        "à", "a", "i"),
-        "À", "A", "i"),
-        "â", "a", "i"),
-        "Â", "A", "i"),
-        "è", "e", "i"),
-        "È", "E", "i"),
-        "ù", "u", "i"),
-        "Ù", "U", "i"),
-        "é", "e", "i"),
-        "É", "E", "i"),
-        "ç", "c", "i"),
-        "Ç", "C", "i"),
-        "ê", "e", "i"),
-        "Ê", "E", "i"),
-        "î", "i", "i"),
-        "Î", "I", "i") AS ?modifiedDish)
-
-        FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
+        FILTER (?id = {dish_id})
 
         # Retrieve ingredients and their links
         OPTIONAL {{ 

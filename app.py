@@ -31,13 +31,13 @@ def random():
 
 @app.route('/about_cuisine', methods=['GET'])
 def about_cuisine():
-    dish_name = request.args.get('dish_name', '')
-    dish = get_dish_by_url(dish_name)
+    dish_id = request.args.get('dish_id', '')
+    dish = get_dish_by_id(dish_id)
     return render_template('about_cuisine.html', dish=dish)
 
 @app.route('/about_ingredient', methods=['GET'])
 def about_ingredient():
-    ingredient_name = request.args.get('ingredient_link', 'https://dbpedia.org/page/French_fries')
+    ingredient_name = request.args.get('ingredient_link', 'https://dbpedia.org/page/Liver_(food)')
     ingredient = get_ingredient_by_link(ingredient_name)
     return render_template('about_ingredient.html', ingredient=ingredient)
 
