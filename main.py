@@ -294,3 +294,56 @@ def autocomplete_french_dishes(search_term):
         suggestions = [result["name"]["value"] for result in results["results"]["bindings"]]
         return suggestions
 
+def get_dish_by_url(dbpedia_url):
+    # Extract the resource identifier from the DBpedia URL
+    resource_identifier = dbpedia_url.rsplit('/', 1)[-1]
+
+    # SPARQL query to retrieve information about the dish
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    WHERE {{
+        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name;
+        a dbo:Food;
+        dbo:thumbnail ?image.
+
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
+
+        OPTIONAL {{ 
+            <http://dbpedia.org/resource/{resource_identifier}> dbo:ingredient ?ingredient.
+            ?ingredient rdfs:label ?ingredientName.
+            FILTER(LANG(?ingredientName) = "en")
+        }}
+
+        OPTIONAL {{
+            <http://dbpedia.org/resource/{resource_identifier}> dbp:mainIngredient ?mainIngredient.
+            FILTER NOT EXISTS {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:ingredient ?ingredient }}
+        }}
+    }}
+    LIMIT 1
+    """
+
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
+        result = results["results"]["bindings"][0]
+
+        dish_info = {
+            'name': result["name"]["value"],
+            'link': dbpedia_url,
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+            'ingredients': result["ingredients"]["value"].split(", ") if "ingredients" in result else [],
+            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
+        }
+
+        return dish_info
+    else:
+        return None
+
