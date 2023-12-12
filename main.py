@@ -2,6 +2,8 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
 
+from unidecode import unidecode
+
 categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries",
               "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews"]
 
@@ -125,7 +127,9 @@ def search_french_dishes(search_term):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.escape(search_term)
+    normalized_search_term = unidecode(search_term)
+    # Sanitize the search term to prevent SPARQL injection
+    safe_search_term = re.sub(r'\W+', '', normalized_search_term)
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -142,7 +146,25 @@ def search_french_dishes(search_term):
 
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        FILTER regex(str(?dish), "{safe_search_term}", "i")
+        BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
+        "à", "a"),
+        "À", "A"),
+        "â", "a"),
+        "Â", "A"),
+        "è", "e"),
+        "È", "E"),
+        "ù", "u"),
+        "Ù", "U"),
+        "é", "e"),
+        "É", "E"),
+        "ç", "c"),
+        "Ç", "C"),
+        "ê", "e"),
+        "Ê", "E"),
+        "î", "i"),
+        "Î", "I") AS ?modifiedDish)
+
+        FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
 
         # Retrieve ingredients and their links
         OPTIONAL {{ 
@@ -184,13 +206,11 @@ def search_french_dishes(search_term):
 def get_dish_by_name(dish_name):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
-    # Sanitize the search term to prevent SPARQL injection
     name = dish_name.rsplit('/', 1)[-1]
-    if '(' in name:
-        name = name.split('(', 1)[0].strip()
-    else:
-        name = name
-    safe_search_term = re.escape(name)
+    # Sanitize the search term to prevent SPARQL injection
+    normalized_search_term = unidecode(name)
+    # Sanitize the search term to prevent SPARQL injection
+    safe_search_term = re.sub(r'\W+', '', normalized_search_term)
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -207,7 +227,25 @@ def get_dish_by_name(dish_name):
 
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        FILTER regex(str(?dish), "{safe_search_term}", "i")
+        BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
+        "à", "a", "i"),
+        "À", "A", "i"),
+        "â", "a", "i"),
+        "Â", "A", "i"),
+        "è", "e", "i"),
+        "È", "E", "i"),
+        "ù", "u", "i"),
+        "Ù", "U", "i"),
+        "é", "e", "i"),
+        "É", "E", "i"),
+        "ç", "c", "i"),
+        "Ç", "C", "i"),
+        "ê", "e", "i"),
+        "Ê", "E", "i"),
+        "î", "i", "i"),
+        "Î", "I", "i") AS ?modifiedDish)
+
+        FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
 
         # Retrieve ingredients and their links
         OPTIONAL {{ 
