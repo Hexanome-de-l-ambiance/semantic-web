@@ -184,6 +184,10 @@ def get_dish_by_name(dish_name):
 
     # Sanitize the search term to prevent SPARQL injection
     name = dish_name.rsplit('/', 1)[-1]
+    if '(' in name:
+        name = name.split('(', 1)[0].strip()
+    else:
+        name = name
     safe_search_term = re.escape(name)
     
 
