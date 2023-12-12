@@ -32,8 +32,10 @@ def random():
 @app.route('/region', methods=['GET'])
 def region():
     region_name = request.args.get('regionName', '')
-    dishes = get_french_dishes_by_region(region_name)
-    return render_template('region.html', dishes=dishes)
+    print(region_name)
+    region = get_french_dishes_by_region(region_name)
+    print(region)
+    return render_template('region.html', region=region)
 
 
 if __name__ == '__main__':
