@@ -5,8 +5,8 @@ import datetime
 
 from unidecode import unidecode
 
-categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries",
-              "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews"]
+
+all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
 
 
 def get_list_french_dishes():
@@ -59,6 +59,7 @@ def get_list_french_dishes():
         }
 
         dishes.append(dish_info)
+    print(dishes)
     return dishes
 
 
@@ -126,13 +127,59 @@ def search_about_french_cuisine(search_term: str, criteria: str = "all"):
     """
 
 
-def search_french_dishes(search_term):
+def search_french_dishes(search_term, categories):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
-    normalized_search_term = unidecode(search_term)
-    # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.sub(r'\W+', '', normalized_search_term)
+    safe_search_term = re.escape(search_term)
+    if not categories:
+        categories = all_categories
+    print(categories)
+    # Join the categories to create a UNION of patterns for the SPARQL query
+    union_patterns = "\nUNION\n".join([
+        f"""
+        {{
+            ?dish dct:subject dbc:{category};
+            rdfs:label ?name;
+            dbo:thumbnail ?image;
+            dbo:wikiPageID ?id.
+
+            FILTER(LANG(?name) = "en")
+            OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
+            BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
+            "à", "a"),
+            "À", "A"),
+            "â", "a"),
+            "Â", "A"),
+            "è", "e"),
+            "È", "E"),
+            "ù", "u"),
+            "Ù", "U"),
+            "é", "e"),
+            "É", "E"),
+            "ç", "c"),
+            "Ç", "C"),
+            "ê", "e"),
+            "Ê", "E"),
+            "î", "i"),
+            "Î", "I") AS ?modifiedDish)
+    
+            FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
+
+            # Retrieve ingredients and their links
+            OPTIONAL {{ 
+                ?dish dbo:ingredient ?ingredient.
+                ?ingredient rdfs:label ?ingredientName.
+                FILTER(LANG(?ingredientName) = "en")
+            }}
+
+            OPTIONAL {{
+                ?dish dbp:mainIngredient ?mainIngredient.
+                FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
+            }}
+        }}
+        """ for category in categories
+    ])
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -142,53 +189,16 @@ def search_french_dishes(search_term):
 
     SELECT ?dish ?id ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {{
-        ?dish dct:subject dbc:French_cuisine;
-        rdfs:label ?name;
-        a dbo:Food;
-        dbo:thumbnail ?image;
-        dbo:wikiPageID ?id.
-
-        FILTER(LANG(?name) = "en")
-        OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
-        "à", "a"),
-        "À", "A"),
-        "â", "a"),
-        "Â", "A"),
-        "è", "e"),
-        "È", "E"),
-        "ù", "u"),
-        "Ù", "U"),
-        "é", "e"),
-        "É", "E"),
-        "ç", "c"),
-        "Ç", "C"),
-        "ê", "e"),
-        "Ê", "E"),
-        "î", "i"),
-        "Î", "I") AS ?modifiedDish)
-
-        FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
-
-        # Retrieve ingredients and their links
-        OPTIONAL {{ 
-            ?dish dbo:ingredient ?ingredient.
-            ?ingredient rdfs:label ?ingredientName.
-            FILTER(LANG(?ingredientName) = "en")
-        }}
-
-        OPTIONAL {{
-            ?dish dbp:mainIngredient ?mainIngredient.
-            FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
-        }}
-
-
+        {union_patterns}
     }}
     LIMIT 100
     """
 
+    print(query)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
+    sparql.method = 'POST'  # Set the HTTP method to POST
+
     results = sparql.query().convert()
 
     dishes = []
@@ -415,27 +425,60 @@ def get_french_dishes_by_region(region):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     cuisine_by_region = region_to_cuisine.get(region.lower())
+    cuisine_by_region_space = cuisine_by_region.replace("_", " ")
     print(cuisine_by_region)
 
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-    query = """
-        PREFIX dbc: <http://dbpedia.org/resource/Category:>
+    query = f"""
         PREFIX dbr: <http://dbpedia.org/resource/>
+        PREFIX dbc: <http://dbpedia.org/resource/Category:>
+        PREFIX dbo: <http://dbpedia.org/ontology/>
+        PREFIX dct: <http://purl.org/dc/terms/>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-        SELECT ?regionalCuisine
+        SELECT ?dish ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
         WHERE {{
-            ?regionalCuisine skos:prefLabel "{}"@en .
-            
+            ?regionalCuisine skos:prefLabel "{cuisine_by_region_space}"@en.
+            ?dish dct:subject ?regionalCuisine.
+            ?dish rdfs:label ?name.
+            ?dish a dbo:Food.
+            ?dish dbo:thumbnail ?image.
+            FILTER(LANG(?name) = "en")
+
+            # Retrieve ingredients and their links
+            OPTIONAL {{ 
+                ?dish dbo:ingredient ?ingredient.
+                ?ingredient rdfs:label ?ingredientName.
+                FILTER(LANG(?ingredientName) = "en")
+            }}
+
+            OPTIONAL {{
+                ?dish dbp:mainIngredient ?mainIngredient.
+                FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
+            }}
         }}
-        """.format(cuisine_by_region.replace("_", " "))
+        LIMIT 100
+
+
+        """
 
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
-    regional_cuisine = results["results"]["bindings"][0]["regionalCuisine"]["value"] if results["results"]["bindings"] else None
-    return regional_cuisine
+    dishes = []
+    for result in results["results"]["bindings"]:
+        dish_info = {
+            'name': result["name"]["value"],
+            'link': result["dish"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+            # List to store ingredients
+            'ingredients': result["ingredients"]["value"].split(", "),
+            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
+        }
 
+        dishes.append(dish_info)
+    return dishes
 
 def get_region_info_link(region):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
