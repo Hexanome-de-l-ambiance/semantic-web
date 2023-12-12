@@ -2,8 +2,7 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
 
-categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries",
-              "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews"]    
+all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
 
 
 def get_list_french_dishes():
@@ -121,11 +120,40 @@ def search_about_french_cuisine(search_term : str, criteria : str = "all"):
     
     
 
-def search_french_dishes(search_term):
+def search_french_dishes(search_term, categories):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
     safe_search_term = re.escape(search_term)
+    if not categories:
+        categories = all_categories
+    print(categories)
+    # Join the categories to create a UNION of patterns for the SPARQL query
+    union_patterns = "\nUNION\n".join([
+        f"""
+        {{
+            ?dish dct:subject dbc:{category};
+            rdfs:label ?name;
+            dbo:thumbnail ?image.
+
+            FILTER(LANG(?name) = "en")
+            OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
+            FILTER regex(str(?dish), "{safe_search_term}", "i")
+
+            # Retrieve ingredients and their links
+            OPTIONAL {{ 
+                ?dish dbo:ingredient ?ingredient.
+                ?ingredient rdfs:label ?ingredientName.
+                FILTER(LANG(?ingredientName) = "en")
+            }}
+
+            OPTIONAL {{
+                ?dish dbp:mainIngredient ?mainIngredient.
+                FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
+            }}
+        }}
+        """ for category in categories
+    ])
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -135,34 +163,15 @@ def search_french_dishes(search_term):
 
     SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {{
-        ?dish dct:subject dbc:French_cuisine;
-        rdfs:label ?name;
-        a dbo:Food;
-        dbo:thumbnail ?image.
-
-        FILTER(LANG(?name) = "en")
-        OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        FILTER regex(str(?dish), "{safe_search_term}", "i")
-
-        # Retrieve ingredients and their links
-        OPTIONAL {{ 
-            ?dish dbo:ingredient ?ingredient.
-            ?ingredient rdfs:label ?ingredientName.
-            FILTER(LANG(?ingredientName) = "en")
-        }}
-
-        OPTIONAL {{
-            ?dish dbp:mainIngredient ?mainIngredient.
-            FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
-        }}
-
-
+        {union_patterns}
     }}
     LIMIT 100
     """
 
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
+    sparql.method = 'POST'  # Set the HTTP method to POST
+
     results = sparql.query().convert()
 
     dishes = []

@@ -19,7 +19,8 @@ def list_all():
 @app.route('/search', methods=['GET'])
 def search():
     search_query = request.args.get('search_query', '')
-    all_dishes = search_french_dishes(search_query)
+    selected_categories = request.args.getlist('categories')
+    all_dishes = search_french_dishes(search_query, selected_categories)
     portions = split_list_into_portions(all_dishes)
     return render_template('results.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
