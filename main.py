@@ -2,8 +2,10 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
 
-categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries",
-              "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews"]
+from unidecode import unidecode
+
+
+all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
 
 
 def get_list_french_dishes():
@@ -14,12 +16,13 @@ def get_list_french_dishes():
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?id ?name ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {
         ?dish dct:subject dbc:French_cuisine.
         ?dish rdfs:label ?name.
         ?dish a dbo:Food.
-        ?dish dbo:thumbnail ?image.
+        ?dish dbo:thumbnail ?image;
+        dbo:wikiPageID ?id.
         FILTER(LANG(?name) = "en")
 
         # Retrieve ingredients and their links
@@ -47,6 +50,7 @@ def get_list_french_dishes():
         dish_info = {
             'name': result["name"]["value"],
             'link': result["dish"]["value"],
+            'id': result["id"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             # List to store ingredients
             'ingredients': result["ingredients"]["value"].split(", "),
@@ -122,11 +126,59 @@ def search_about_french_cuisine(search_term: str, criteria: str = "all"):
     """
 
 
-def search_french_dishes(search_term):
+def search_french_dishes(search_term, categories):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
     safe_search_term = re.escape(search_term)
+    if not categories:
+        categories = all_categories
+    print(categories)
+    # Join the categories to create a UNION of patterns for the SPARQL query
+    union_patterns = "\nUNION\n".join([
+        f"""
+        {{
+            ?dish dct:subject dbc:{category};
+            rdfs:label ?name;
+            dbo:thumbnail ?image;
+            dbo:wikiPageID ?id.
+
+            FILTER(LANG(?name) = "en")
+            OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
+            BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
+            "à", "a"),
+            "À", "A"),
+            "â", "a"),
+            "Â", "A"),
+            "è", "e"),
+            "È", "E"),
+            "ù", "u"),
+            "Ù", "U"),
+            "é", "e"),
+            "É", "E"),
+            "ç", "c"),
+            "Ç", "C"),
+            "ê", "e"),
+            "Ê", "E"),
+            "î", "i"),
+            "Î", "I") AS ?modifiedDish)
+    
+            FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
+
+            # Retrieve ingredients and their links
+            OPTIONAL {{ 
+                ?dish dbo:ingredient ?ingredient.
+                ?ingredient rdfs:label ?ingredientName.
+                FILTER(LANG(?ingredientName) = "en")
+            }}
+
+            OPTIONAL {{
+                ?dish dbp:mainIngredient ?mainIngredient.
+                FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
+            }}
+        }}
+        """ for category in categories
+    ])
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -134,36 +186,18 @@ def search_french_dishes(search_term):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?id ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {{
-        ?dish dct:subject dbc:French_cuisine;
-        rdfs:label ?name;
-        a dbo:Food;
-        dbo:thumbnail ?image.
-
-        FILTER(LANG(?name) = "en")
-        OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        FILTER regex(str(?dish), "{safe_search_term}", "i")
-
-        # Retrieve ingredients and their links
-        OPTIONAL {{ 
-            ?dish dbo:ingredient ?ingredient.
-            ?ingredient rdfs:label ?ingredientName.
-            FILTER(LANG(?ingredientName) = "en")
-        }}
-
-        OPTIONAL {{
-            ?dish dbp:mainIngredient ?mainIngredient.
-            FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
-        }}
-
-
+        {union_patterns}
     }}
     LIMIT 100
     """
 
+    print(query)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
+    sparql.method = 'POST'  # Set the HTTP method to POST
+
     results = sparql.query().convert()
 
     dishes = []
@@ -182,17 +216,9 @@ def search_french_dishes(search_term):
     return dishes
 
 
-def get_dish_by_name(dish_name):
+def get_dish_by_id(dish_id):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
-
-    # Sanitize the search term to prevent SPARQL injection
-    name = dish_name.rsplit('/', 1)[-1]
-    if '(' in name:
-        name = name.split('(', 1)[0].strip()
-    else:
-        name = name
-    safe_search_term = re.escape(name)
-
+    print(dish_id)
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
     PREFIX dbc: <http://dbpedia.org/resource/Category:>
@@ -204,11 +230,12 @@ def get_dish_by_name(dish_name):
         ?dish dct:subject dbc:French_cuisine;
         rdfs:label ?name;
         a dbo:Food;
-        dbo:thumbnail ?image.
+        dbo:thumbnail ?image;
+        dbo:wikiPageID ?id.
 
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        FILTER regex(str(?dish), "{safe_search_term}", "i")
+        FILTER (?id = {dish_id})
 
         # Retrieve ingredients and their links
         OPTIONAL {{ 
@@ -259,11 +286,9 @@ def get_ingredient_by_link(ingredient_url):
 
     SELECT ?name ?description ?image
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
-        a owl:Thing;
-        dbo:thumbnail ?image.
-
-        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name.
+        
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image . FILTER(LANG(?description) = "en"). FILTER(LANG(?name) = "en")}}
     }}
     LIMIT 1
     """
@@ -300,11 +325,9 @@ def get_chef_by_link(chef_url):
 
     SELECT ?name ?description ?image
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
-        a dbo:Person;
-        dbo:thumbnail ?image.
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
 
-        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
     }}
     LIMIT 1
     """
@@ -341,11 +364,9 @@ def get_restaurant_by_link(restaurant_url):
 
     SELECT ?name ?description ?image
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
-        a dbo:Restaurant;
-        dbo:thumbnail ?image.
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
 
-        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en").}}
     }}
     LIMIT 1
     """

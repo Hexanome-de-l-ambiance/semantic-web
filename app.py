@@ -19,7 +19,8 @@ def list_all():
 @app.route('/search', methods=['GET'])
 def search():
     search_query = request.args.get('search_query', '')
-    all_dishes = search_french_dishes(search_query)
+    selected_categories = request.args.getlist('categories')
+    all_dishes = search_french_dishes(search_query, selected_categories)
     portions = split_list_into_portions(all_dishes)
     return render_template('results.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
@@ -31,13 +32,13 @@ def random():
 
 @app.route('/about_cuisine', methods=['GET'])
 def about_cuisine():
-    dish_name = request.args.get('dish_name', '')
-    dish = get_dish_by_url(dish_name)
+    dish_id = request.args.get('dish_id', '')
+    dish = get_dish_by_id(dish_id)
     return render_template('about_cuisine.html', dish=dish)
 
 @app.route('/about_ingredient', methods=['GET'])
 def about_ingredient():
-    ingredient_name = request.args.get('ingredient_link', 'https://dbpedia.org/page/French_fries')
+    ingredient_name = request.args.get('ingredient_link', 'https://dbpedia.org/page/Liver_(food)')
     ingredient = get_ingredient_by_link(ingredient_name)
     return render_template('about_ingredient.html', ingredient=ingredient)
 
