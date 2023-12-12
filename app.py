@@ -58,9 +58,10 @@ def about_restaurant():
 def region():
     region_name = request.args.get('regionName', '')
     print(region_name)
-    region = get_french_dishes_by_region(region_name)
-    print(region)
-    return render_template('region.html', region=region)
+    regional_dishes = get_french_dishes_by_region(region_name)
+    portions = split_list_into_portions(regional_dishes)
+    print(portions)
+    return render_template('region.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
 
 if __name__ == '__main__':

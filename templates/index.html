@@ -135,10 +135,12 @@
     <div id="tooltip"
          style="position: absolute; display: none; background: white; border: 1px solid black; padding: 5px;"></div>
 
-    <form id="regionForm" action="/region" method="post" style="display: none;">
-        <input type="hidden" name="regionName" id="regionName">
-        <input type="submit" value="Submit">
-    </form>
+
+		<form id="regionForm" action="/region" method="get" style="display: none;">
+			<input type="hidden" name="regionName" id="regionName">
+			<input type="submit" value="Submit">
+		</form>
+
 
     <div class="carte">
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
