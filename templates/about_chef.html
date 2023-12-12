@@ -80,6 +80,23 @@
                         <div class="section-heading">
                             <h2>Description</h2>
                             <p>{{ chef.description }}</p>
+                            
+                            <h2>Birth date</h2>
+                            <p>
+                                {{ chef.birthDate }}
+                                {% if not chef.deathDate %}
+                                (age {{ chef.age }})
+                                {% endif %}
+                            </p>
+
+                            {% if chef.deathDate %}
+                            <h2>Death date</h2>
+                            <p>{{ chef.deathDate }} (aged {{chef.age}})</p>
+                            {% endif %}
+
+                            <h2>Birth Place</h2>
+                            <p>{{ chef.birthPlace }}</p>
+
                         </div>
                     </div>
                 </div>

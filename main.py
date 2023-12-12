@@ -1,6 +1,7 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
+import datetime
 
 from unidecode import unidecode
 
@@ -313,11 +314,17 @@ def get_chef_by_link(chef_url):
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?name ?description ?image
+    SELECT ?name ?description ?image ?birthPlace ?birthDate ?deathDate
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
+        dbo:birthPlace ?birthPlaceLink;
+        dbo:birthDate ?birthDate.
+        ?birthPlaceLink rdfs:label ?birthPlace.
+        
+        
 
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:deathDate ?deathDate.}}
     }}
     LIMIT 1
     """
@@ -335,7 +342,17 @@ def get_chef_by_link(chef_url):
             'link': chef_url,
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
+            'birthPlace': result["birthPlace"]["value"] if "birthPlace" in result else '',
+            'birthDate': result["birthDate"]["value"] if "birthDate" in result else None,
+            'deathDate': result["deathDate"]["value"] if "deathDate" in result else None,
         }
+        if (chef_info['birthDate'] and chef_info['deathDate']):
+            chef_info['age'] = compute_age(
+                chef_info['birthDate'], chef_info['deathDate'])
+        elif (chef_info['birthDate']):
+            chef_info['age'] = compute_age(chef_info['birthDate'])
+        else:
+            chef_info['age'] = None
 
         return chef_info
     else:
@@ -567,3 +584,22 @@ def get_dish_by_url(dbpedia_url):
         return dish_info
     else:
         return None
+
+
+def compute_age(birth_date, death_date=None):
+    # Extract the year from the birth date
+    birth_year = int(birth_date.split("-")[0])
+
+    now = datetime.datetime.now()
+
+    if death_date:
+        death_year = int(death_date.split("-")[0])
+        age = death_year - birth_year
+    else:
+        age = now.year - birth_year
+
+        # check if the birthday has already passed this year
+        if now.month < int(birth_date.split("-")[1]):
+            age -= 1
+
+    return age
