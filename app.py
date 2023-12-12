@@ -31,8 +31,8 @@ def random():
 
 @app.route('/about_cuisine', methods=['GET'])
 def about_cuisine():
-    dish_name = request.args.get('dish_name', '')
-    dish = get_dish_by_url(dish_name)
+    dish_id = request.args.get('dish_id', '')
+    dish = get_dish_by_id(dish_id)
     return render_template('about_cuisine.html', dish=dish)
 
 @app.route('/about_ingredient', methods=['GET'])
@@ -52,6 +52,15 @@ def about_restaurant():
     restaurant_name = request.args.get('restaurant_link', 'https://dbpedia.org/page/Le_Jules_Verne')
     restaurant = get_restaurant_by_link(restaurant_name)
     return render_template('about_restaurant.html', restaurant=restaurant)
+
+@app.route('/region', methods=['GET'])
+def region():
+    region_name = request.args.get('regionName', '')
+    print(region_name)
+    region = get_french_dishes_by_region(region_name)
+    print(region)
+    return render_template('region.html', region=region)
+
 
 if __name__ == '__main__':
     app.run()
