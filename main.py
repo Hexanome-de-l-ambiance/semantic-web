@@ -258,11 +258,9 @@ def get_ingredient_by_link(ingredient_url):
 
     SELECT ?name ?description ?image
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
-        a owl:Thing;
-        dbo:thumbnail ?image.
-
-        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name.
+        
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image . FILTER(LANG(?description) = "en"). FILTER(LANG(?name) = "en")}}
     }}
     LIMIT 1
     """
@@ -299,11 +297,9 @@ def get_chef_by_link(chef_url):
 
     SELECT ?name ?description ?image
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
-        a dbo:Person;
-        dbo:thumbnail ?image.
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
 
-        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
     }}
     LIMIT 1
     """
@@ -340,11 +336,9 @@ def get_restaurant_by_link(restaurant_url):
 
     SELECT ?name ?description ?image
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
-        a dbo:Restaurant;
-        dbo:thumbnail ?image.
+        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
 
-        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en")}}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en").}}
     }}
     LIMIT 1
     """
