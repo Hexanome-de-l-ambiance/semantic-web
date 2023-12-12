@@ -89,7 +89,7 @@
         <div id="fh5co-featured-testimony" class="fh5co-section">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-12 fh5co-heading">
+                    <div class="col-md-6 fh5co-heading">
                         <h2>Ingredients</h2>
                         <div class="row">
                             <div class="col-md-6">
@@ -100,7 +100,16 @@
                                 {% set parts = ingredient_info.split(' - ') %}
                                 <p><a href="{{ parts[1] }}">{{ parts[0] }}</a></p>
                                 {% endfor %}
-                                {% endif %}                            
+                                {% endif %}           
+                            </div>                 
+                        </div>
+                    </div>
+                    <div class="col-md-6 fh5co-heading">
+                        <h2>Link dbpedia</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><a href="{{ dish.link }}">{{ dish.name }}</a></p>
+                            </div>                 
                         </div>
                     </div>
                 </div>
