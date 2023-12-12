@@ -1,6 +1,7 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
+from unidecode import unidecode
 
 
 def get_list_french_dishes():
@@ -109,9 +110,10 @@ def get_random_french_dish():
 def search_french_dishes(search_term):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
+    normalized_search_term = unidecode(search_term)
     # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.escape(search_term)
-
+    safe_search_term = re.sub(r'\W+', '', normalized_search_term)
+    
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
     PREFIX dbc: <http://dbpedia.org/resource/Category:>
@@ -127,7 +129,27 @@ def search_french_dishes(search_term):
 
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
-        FILTER regex(str(?dish), "{safe_search_term}", "i")
+
+
+        BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
+        "à", "a", "i"),
+        "À", "A", "i"),
+        "â", "a", "i"),
+        "Â", "A", "i"),
+        "è", "e", "i"),
+        "È", "E", "i"),
+        "ù", "u", "i"),
+        "Ù", "U", "i"),
+        "é", "e", "i"),
+        "É", "E", "i"),
+        "ç", "c", "i"),
+        "Ç", "C", "i"),
+        "ê", "e", "i"),
+        "Ê", "E", "i"),
+        "î", "i", "i"),
+        "Î", "I", "i") AS ?modifiedDish)
+
+        FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
 
         # Retrieve ingredients and their links
         OPTIONAL {{ 
@@ -244,7 +266,26 @@ def split_list_into_portions(dishes):
 
     return portions
 
+def remove_french_accents(text):
+    replacements = {
+        'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a',
+        'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A',
+        'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+        'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E',
+        'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+        'Ì': 'I', 'Í': 'I', 'Î': 'I', 'Ï': 'I',
+        'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+        'Ò': 'O', 'Ó': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O',
+        'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u',
+        'Ù': 'U', 'Ú': 'U', 'Û': 'U', 'Ü': 'U',
+        'ç': 'c', 'Ç': 'C'
+    }
 
+    # Replace French accented characters with their non-accented counterparts
+    for char, replacement in replacements.items():
+        text = text.replace(char, replacement)
+    
+    return text
 
  # partie sur l'autocomplétion
 def autocomplete_french_dishes(search_term):

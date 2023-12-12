@@ -35,5 +35,11 @@ def about_cuisine():
     dish = get_dish_by_name(dish_name)
     return render_template('about_cuisine.html', dish=dish)
 
+@app.route('/about_ingredient', methods=['GET'])
+def about_ingredient():
+    dish_name = request.args.get('dish_name', '')
+    dish = get_dish_by_name(dish_name)
+    return render_template('about_ingredient.html', dish=dish)
+
 if __name__ == '__main__':
     app.run()
