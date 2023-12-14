@@ -114,6 +114,8 @@ def get_random_french_dish():
         }
 
         dishes.append(dish_info)
+
+    print(dishes)
     return dishes[0]
 
 

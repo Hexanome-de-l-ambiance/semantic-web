@@ -131,6 +131,14 @@
         <script src="../static/js/jquery.flexslider-min.js"></script>
         <!-- Main -->
         <script src="../static/js/main.js"></script>
+        <script>
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', () => {
+                    console.log('Image failed to load.');
+                    img.src = 'static/images/placeholder.png'; // Set fallback image
+                });
+            });
+        </script>
 
 </body>
 
