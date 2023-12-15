@@ -34,8 +34,8 @@ def random():
 
 @app.route('/about_cuisine', methods=['GET'])
 def about_cuisine():
-    dish_id = request.args.get('dish_id', '')
-    dish = get_dish_by_id(dish_id)
+    dish_name = request.args.get('dish_link', '')
+    dish = get_dish_by_link(dish_name)
     return render_template('about_cuisine.html', dish=dish)
 
 

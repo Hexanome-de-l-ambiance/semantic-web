@@ -298,7 +298,7 @@ def get_ingredient_by_link(ingredient_url):
     SELECT ?name ?description ?image
     WHERE {{
         <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name.
-        
+        FILTER(LANG(?name) = "en")
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image . FILTER(LANG(?description) = "en"). FILTER(LANG(?name) = "en")}}
     }}
     LIMIT 1
@@ -341,7 +341,7 @@ def get_chef_by_link(chef_url):
         dbo:birthDate ?birthDate.
         ?birthPlaceLink rdfs:label ?birthPlace.
         
-        
+        FILTER(LANG(?name) = "en")
 
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:deathDate ?deathDate.}}
@@ -392,7 +392,7 @@ def get_restaurant_by_link(restaurant_url):
     SELECT ?name ?description ?image
     WHERE {{
         <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
-
+        FILTER(LANG(?name) = "en")
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en").}}
     }}
     LIMIT 1
@@ -583,9 +583,9 @@ def autocomplete_french_dishes(search_term):
         return suggestions
 
 
-def get_dish_by_url(dbpedia_url):
+def get_dish_by_link(dish_url):
     # Extract the resource identifier from the DBpedia URL
-    resource_identifier = dbpedia_url.rsplit('/', 1)[-1]
+    resource_identifier = dish_url.rsplit('/', 1)[-1]
 
     # SPARQL query to retrieve information about the dish
     query = f"""
@@ -598,6 +598,8 @@ def get_dish_by_url(dbpedia_url):
         <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name;
         a dbo:Food;
         dbo:thumbnail ?image.
+        
+        FILTER(LANG(?name) = "en")
 
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
 
@@ -625,7 +627,7 @@ def get_dish_by_url(dbpedia_url):
 
         dish_info = {
             'name': result["name"]["value"],
-            'link': dbpedia_url,
+            'link': dish_url,
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
             'ingredients': result["ingredients"]["value"].split(", ") if "ingredients" in result else [],
