@@ -208,6 +208,7 @@ def search_french_dishes(search_term, categories):
         dish_info = {
             'name': result["name"]["value"],
             'link': result["dish"]["value"],
+            'id': result["id"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
             # List to store ingredients
