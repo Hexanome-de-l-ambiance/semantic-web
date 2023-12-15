@@ -38,7 +38,7 @@ def about_cuisine():
 
 @app.route('/about_ingredient', methods=['GET'])
 def about_ingredient():
-    ingredient_name = request.args.get('ingredient_link', 'https://dbpedia.org/page/Liver_(food)')
+    ingredient_name = request.args.get('ingredient_link', '')
     ingredient = get_ingredient_by_link(ingredient_name)
     return render_template('about_ingredient.html', ingredient=ingredient)
 
