@@ -63,7 +63,7 @@
                     <div class="col-md-12 text-center">
                         <div class="display-t js-fullheight">
                             <div class="display-tc js-fullheight animate-box" data-animate-effect="fadeIn">
-                                <h1>Information cuisine</h1>
+                                <h1>{{dish.name}}</h1>
                             </div>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                                 {% else %}
                                 {% for ingredient_info in dish.ingredients %}
                                 {% set parts = ingredient_info.split(' - ') %}
-                                <p><a href="{{ parts[1] }}">{{ parts[0] }}</a></p>
+                                <p><a href="/about_ingredient?ingredient_link={{ parts[1] }}">{{ parts[0] }}</a></p>
                                 {% endfor %}
                                 {% endif %}           
                             </div>                 
