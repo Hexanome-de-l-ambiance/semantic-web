@@ -2,8 +2,6 @@ from flask import Flask, flash, redirect, url_for, render_template, request, sen
 from main import *
 
 app = Flask(__name__)
-app.secret_key = 'SYKJumpsOverTheLazyDog'
-
 
 @app.route('/')
 def hello_world():
@@ -72,6 +70,7 @@ def about_restaurant():
 @app.route('/region', methods=['GET'])
 def region():
     region_name = request.args.get('regionName', '')
+
     regional_dishes = get_french_dishes_by_region(region_name)
 
     # if no dishes found, display a message below the map without reloading the page
@@ -79,11 +78,24 @@ def region():
         return render_template('region.html', no_dishes=True)
 
     portions = split_list_into_portions(regional_dishes)
+
     return render_template('region.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)
+
+@app.route('/fetch-wikipedia-image')
+def fetch_wikipedia_image():
+    full_keyword = request.args.get('keyword')
+    keyword_parts = full_keyword.split()
+    # Rejoin all parts except the last one
+    keyword = ' '.join(keyword_parts[:-1])
+    image_url = get_wikipedia_image(keyword)
+    if image_url:
+        return jsonify({'imageUrl': image_url})
+    else:
+        return jsonify({'imageUrl': 'static/images/placeholder_chef.png'})
 
 if __name__ == '__main__':
     app.run()
