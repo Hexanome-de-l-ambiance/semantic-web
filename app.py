@@ -59,6 +59,8 @@ def region():
     region_name = request.args.get('regionName', '')
     print(region_name)
     regional_dishes = get_french_dishes_by_region(region_name)
+    if (len(regional_dishes) == 0):
+        return render_template('no_results.html')
     portions = split_list_into_portions(regional_dishes)
     print(portions)
     return render_template('region.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
