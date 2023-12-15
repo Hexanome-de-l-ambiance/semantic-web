@@ -6,7 +6,8 @@ import datetime
 from unidecode import unidecode
 
 
-all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
+all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods",
+                  "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
 
 
 def get_list_french_dishes():
@@ -424,6 +425,7 @@ region_to_cuisine = {
     "bourgogne-franche-comté": "Cuisine_of_Haute-Saône"
 }
 
+
 def get_french_dishes_by_region(region):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
@@ -486,9 +488,11 @@ def get_french_dishes_by_region(region):
         dishes.append(dish_info)
     return dishes
 
+
 def get_region_info_link(region):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
-    region_formatted = region.replace(" ", "_")  # Replace spaces with underscores for DBpedia resource format
+    # Replace spaces with underscores for DBpedia resource format
+    region_formatted = region.replace(" ", "_")
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -520,14 +524,6 @@ def get_region_info_link(region):
 
     else:
         return "No information found for the specified region."
-
-# Example usage:
-
-
-
-# Example usage
-# french_dishes = get_french_dishes()
-# print(french_dishes)
 
 
 def split_list_into_portions(dishes):

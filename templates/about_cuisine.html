@@ -99,14 +99,15 @@
                                 {% else %}
                                 {% for ingredient_info in dish.ingredients %}
                                 {% set parts = ingredient_info.split(' - ') %}
-                                <p><a href="/about_ingredient?ingredient_link={{ parts[1] }}">{{ parts[0] }}</a></p>
+                                <a href="/about_ingredient?ingredient_link={{ parts[1] }}">{{ parts[0] }}</a>
+                                <p></p>
                                 {% endfor %}
                                 {% endif %}           
                             </div>                 
                         </div>
                     </div>
                     <div class="col-md-6 fh5co-heading">
-                        <h2>Link dbpedia</h2>
+                        <h2>DBpedia link </h2>
                         <div class="row">
                             <div class="col-md-6">
                                 <p><a href="{{ dish.link }}">{{ dish.name }}</a></p>
