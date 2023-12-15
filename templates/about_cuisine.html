@@ -106,14 +106,16 @@
                             </div>                 
                         </div>
                     </div>
+                    {% if dish.variant %}
                     <div class="col-md-6 fh5co-heading">
-                        <h2>DBpedia link </h2>
+                        <h2>Similar dishes</h2>
                         <div class="row">
                             <div class="col-md-6">
-                                <p><a href="{{ dish.link }}">{{ dish.name }}</a></p>
-                            </div>                 
+                                <p> {{dish.variant}} </p>
+                            </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

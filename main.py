@@ -230,7 +230,7 @@ def get_dish_by_id(dish_id):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient ?variant
     WHERE {{
         ?dish dct:subject dbc:French_cuisine;
         rdfs:label ?name;
@@ -253,6 +253,11 @@ def get_dish_by_id(dish_id):
             ?dish dbp:mainIngredient ?mainIngredient.
             FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
         }}
+        
+        # Retrieve variants of this dish
+        OPTIONAL {{
+            ?dish dbp:variations ?variant.
+        }}
 
 
     }}
@@ -272,7 +277,8 @@ def get_dish_by_id(dish_id):
             'description': result["description"]["value"] if "description" in result else '',
             # List to store ingredients
             'ingredients': result["ingredients"]["value"].split(", "),
-            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
+            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else "",
+            'variant': result["variant"]["value"] if "variant" in result else "",
         }
 
         dishes.append(dish_info)
