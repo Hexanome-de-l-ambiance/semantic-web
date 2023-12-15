@@ -740,6 +740,50 @@ def compute_age(birth_date, death_date=None):
     return age
 
 
+def get_reco_by_link(dish_url):
+    # Extract the resource identifier from the DBpedia URL
+    resource_identifier = dish_url.rsplit('/', 1)[-1]
+
+    # SPARQL query to retrieve information about the dish
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?otherFood (COUNT(?sharedIngredient) AS ?sharedIngredientCount) ?name ?image
+    WHERE {{
+        <http://dbpedia.org/resource/{resource_identifier}> dbo:ingredient ?ingredient.
+        ?otherFood dbo:ingredient ?sharedIngredient;
+        dct:subject dbc:French_cuisine;
+        rdfs:label ?name;
+        dbo:thumbnail ?image;
+        a dbo:Food.
+        FILTER(LANG(?name) = "en")
+        FILTER (?otherFood != <http://dbpedia.org/resource/{resource_identifier}>)
+        FILTER (?ingredient = ?sharedIngredient)
+    }}
+    GROUP BY ?otherFood ?name ?image
+    ORDER BY DESC(?sharedIngredientCount)
+    LIMIT 5
+    """
+
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    dishes = []
+    for result in results["results"]["bindings"]:
+        dish_info = {
+            'name': result["name"]["value"],
+            'link': result["otherFood"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+        }
+        dishes.append(dish_info)
+
+    return dishes
+
+
 def get_wikipedia_image(title):
     # Step 1: Get the Page ID
     params = {

@@ -41,7 +41,8 @@ def random():
 def about_cuisine():
     dish_name = request.args.get('dish_link', '')
     dish = get_dish_by_link(dish_name)
-    return render_template('about_cuisine.html', dish=dish)
+    reco = get_reco_by_link(dish_name)
+    return render_template('about_cuisine.html', dish=dish, reco=reco)
 
 
 @app.route('/about_ingredient', methods=['GET'])
