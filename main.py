@@ -60,7 +60,6 @@ def get_list_french_dishes():
         }
 
         dishes.append(dish_info)
-    print(dishes)
     return dishes
 
 
@@ -116,7 +115,6 @@ def get_random_french_dish():
 
         dishes.append(dish_info)
 
-    print(dishes)
     return dishes[0]
 
 
@@ -137,7 +135,6 @@ def search_french_dishes(search_term, categories):
     safe_search_term = re.escape(search_term)
     if not categories:
         categories = all_categories
-    print(categories)
     # Join the categories to create a UNION of patterns for the SPARQL query
     union_patterns = "\nUNION\n".join([
         f"""
@@ -197,7 +194,6 @@ def search_french_dishes(search_term, categories):
     LIMIT 100
     """
 
-    print(query)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     sparql.method = 'POST'  # Set the HTTP method to POST
@@ -221,9 +217,86 @@ def search_french_dishes(search_term, categories):
     return dishes
 
 
+def complete_search_french_dishes(search_term, categories):
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+
+    # Sanitize the search term to prevent SPARQL injection
+    safe_search_term = re.escape(search_term)
+    if not categories:
+        categories = all_categories
+
+    # Join the categories to create a UNION of patterns for the SPARQL query
+    union_patterns = "\nUNION\n".join([
+        f"""
+        {{
+            ?dish dct:subject dbc:{category};
+            rdfs:label ?name;
+            dbo:thumbnail ?image;
+            dbo:wikiPageID ?id.
+
+            FILTER(LANG(?name) = "en")
+            OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
+            BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
+            "à", "a"),
+            "À", "A"),
+            "â", "a"),
+            "Â", "A"),
+            "è", "e"),
+            "È", "E"),
+            "ù", "u"),
+            "Ù", "U"),
+            "é", "e"),
+            "É", "E"),
+            "ç", "c"),
+            "Ç", "C"),
+            "ê", "e"),
+            "Ê", "E"),
+            "î", "i"),
+            "Î", "I") AS ?modifiedDish)
+    
+            FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
+
+            # Retrieve ingredients and their links
+            OPTIONAL {{ 
+                ?dish dbo:ingredient ?ingredient.
+                ?ingredient rdfs:label ?ingredientName.
+                FILTER(LANG(?ingredientName) = "en")
+            }}
+
+            OPTIONAL {{
+                ?dish dbp:mainIngredient ?mainIngredient.
+                FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
+            }}
+        }}
+        """ for category in categories
+    ])
+
+    query = f"""
+    PREFIX dbr: <http://dbpedia.org/resource/>
+    PREFIX dbc: <http://dbpedia.org/resource/Category:>
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?dish ?id ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    WHERE {{
+        {union_patterns}
+    }}
+    LIMIT 100
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    sparql.method = 'POST'  # Set the HTTP method to POST
+
+    results = sparql.query().convert()
+
+    dishes = [result["name"]["value"] for result in results["results"]["bindings"]]
+
+    # Return the list of dish names in JSON format
+    return dishes
+
 def get_dish_by_id(dish_id):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
-    print(dish_id)
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
     PREFIX dbc: <http://dbpedia.org/resource/Category:>
