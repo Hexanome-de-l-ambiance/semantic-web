@@ -155,6 +155,7 @@
 		<script>
 			$(document).ready(function () {
 				console.log("ready!");
+
 				$('.basic').autoComplete({
 					resolverSettings: {
 						url: '/searchComplete'
@@ -167,6 +168,13 @@
 					$('.bootstrap-autocomplete.dropdown-menu').css('display', 'block');
 				} else {
 					$('.bootstrap-autocomplete.dropdown-menu').css('display', 'none');
+				}
+			});
+			$(document).on('click', function (event) {
+				if (!$(event.target).closest('.basic').length && !$(event.target).closest('.bootstrap-autocomplete.dropdown-menu').length) {
+					$('.bootstrap-autocomplete.dropdown-menu').css('display', 'none');
+				} else if ($(event.target).closest('.bootstrap-autocomplete.dropdown-menu').length && $('.basic').val().length >= 3) {
+					$('.bootstrap-autocomplete.dropdown-menu').css('display', 'block');
 				}
 			});
 		</script>
