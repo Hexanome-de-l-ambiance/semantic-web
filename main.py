@@ -136,7 +136,9 @@ def search_french_dishes(search_term, categories):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.escape(search_term)
+    normalized_search_term = unidecode(search_term)
+    # Sanitize the search term to prevent SPARQL injection
+    safe_search_term = re.sub(r'\W+', '', normalized_search_term)    
     if not categories:
         categories = all_categories
     # Join the categories to create a UNION of patterns for the SPARQL query
@@ -225,7 +227,10 @@ def complete_search_french_dishes(search_term, categories):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.escape(search_term)
+    # Sanitize the search term to prevent SPARQL injection
+    normalized_search_term = unidecode(search_term)
+    # Sanitize the search term to prevent SPARQL injection
+    safe_search_term = re.sub(r'\W+', '', normalized_search_term)       
     if not categories:
         categories = all_categories
 
