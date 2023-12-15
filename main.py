@@ -1,3 +1,4 @@
+import random
 from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
@@ -65,14 +66,16 @@ def get_list_french_dishes():
 
 def get_random_french_dish():
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
-    query = """
+    offset = random.randint(0, 50)
+
+    query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
     PREFIX dbc: <http://dbpedia.org/resource/Category:>
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
     SELECT ?dish ?name ?image ?description (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
-    WHERE {
+    WHERE {{
         ?dish dct:subject dbc:French_cuisine.
         ?dish rdfs:label ?name.
         ?dish a dbo:Food.
@@ -92,11 +95,12 @@ def get_random_french_dish():
             ?dish dbp:mainIngredient ?mainIngredient.
             FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
         }}
-    }
-    ORDER BY RAND()
+    }}
+    OFFSET {offset}
     LIMIT 1
 
     """
+    print(query)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
@@ -371,7 +375,7 @@ def get_ingredient_by_link(ingredient_url):
     SELECT ?name ?description ?image
     WHERE {{
         <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name.
-        
+        FILTER(LANG(?name) = "en")
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image . FILTER(LANG(?description) = "en"). FILTER(LANG(?name) = "en")}}
     }}
     LIMIT 1
@@ -414,7 +418,7 @@ def get_chef_by_link(chef_url):
         dbo:birthDate ?birthDate.
         ?birthPlaceLink rdfs:label ?birthPlace.
         
-        
+        FILTER(LANG(?name) = "en")
 
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:deathDate ?deathDate.}}
@@ -465,7 +469,7 @@ def get_restaurant_by_link(restaurant_url):
     SELECT ?name ?description ?image
     WHERE {{
         <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
-
+        FILTER(LANG(?name) = "en")
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en").}}
     }}
     LIMIT 1
@@ -513,7 +517,6 @@ def get_french_dishes_by_region(region):
     if cuisine_by_region is None:
         return []
     cuisine_by_region_space = cuisine_by_region.replace("_", " ")
-
 
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     query = f"""
@@ -656,9 +659,9 @@ def autocomplete_french_dishes(search_term):
         return suggestions
 
 
-def get_dish_by_url(dbpedia_url):
+def get_dish_by_link(dish_url):
     # Extract the resource identifier from the DBpedia URL
-    resource_identifier = dbpedia_url.rsplit('/', 1)[-1]
+    resource_identifier = dish_url.rsplit('/', 1)[-1]
 
     # SPARQL query to retrieve information about the dish
     query = f"""
@@ -671,6 +674,8 @@ def get_dish_by_url(dbpedia_url):
         <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name;
         a dbo:Food;
         dbo:thumbnail ?image.
+        
+        FILTER(LANG(?name) = "en")
 
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
 
@@ -698,7 +703,7 @@ def get_dish_by_url(dbpedia_url):
 
         dish_info = {
             'name': result["name"]["value"],
-            'link': dbpedia_url,
+            'link': dish_url,
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
             'ingredients': result["ingredients"]["value"].split(", ") if "ingredients" in result else [],
