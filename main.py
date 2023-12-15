@@ -421,10 +421,10 @@ def get_restaurant_by_link(restaurant_url):
 region_to_cuisine = {
     "occitanie": "Occitan_cuisine",
     "normandie": "Norman_cuisine",
-    "provence-alpes-cote d'azur": "Cuisine_of_Provence",
+    "provence-alpes-côte d'azur": "Cuisine_of_Provence",
     "hauts-de-france": "Picardy_cuisine",
-    "grand_est": "Alsatian_cuisine",
-    "auvergne-rhone-alpes": "Cuisine_of_Auvergne-Rhône-Alpes",
+    "grand est": "Alsatian_cuisine",
+    "auvergne-rhône-alpes": "Cuisine_of_Auvergne-Rhône-Alpes",
     "corse": "Corsican_cuisine",
     "nouvelle-aquitaine": "Basque_cuisine",
     "bretagne": "Breton_cuisine",
@@ -436,8 +436,11 @@ def get_french_dishes_by_region(region):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     cuisine_by_region = region_to_cuisine.get(region.lower())
+
+    if cuisine_by_region is None:
+        return []
     cuisine_by_region_space = cuisine_by_region.replace("_", " ")
-    print(cuisine_by_region)
+
 
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     query = f"""
