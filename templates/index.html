@@ -633,14 +633,8 @@
     <script src="../static/js/jquery.flexslider-min.js"></script>
     <!-- Main -->
     <script src="../static/js/main.js"></script>
-    <script>
-        document.querySelectorAll('img').forEach(img => {
-            img.addEventListener('error', () => {
-                console.log('Image failed to load.');
-                img.src = 'static/images/placeholder_cuisine.png'; // Set fallback image
-            });
-        });
-    </script>
+
+
     <script>
         window.onload = function() {
             {% with messages = get_flashed_messages() %}

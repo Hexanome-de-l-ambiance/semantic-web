@@ -1,8 +1,7 @@
-from flask import Flask, flash, redirect, url_for, render_template, request
+from flask import Flask, flash, redirect, url_for, render_template, request, jsonify
 from main import *
 
 app = Flask(__name__)
-app.secret_key = 'SYKJumpsOverTheLazyDog'
 @app.route('/')
 def hello_world():
     return render_template('index.html')
@@ -56,16 +55,30 @@ def about_restaurant():
 @app.route('/region', methods=['GET'])
 def region():
     region_name = request.args.get('regionName', '')
-    print(region_name)
+    # print(region_name)
     regional_dishes = get_french_dishes_by_region(region_name)
     if len(regional_dishes) == 0:
         flash('No regional dishes found for the selected region.')
         return redirect(url_for('hello_world'))
 
     portions = split_list_into_portions(regional_dishes)
-    print(portions)
+
+
+
     return render_template('region.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
+
+@app.route('/fetch-wikipedia-image')
+def fetch_wikipedia_image():
+    full_keyword = request.args.get('keyword')
+    keyword_parts = full_keyword.split()
+    # Rejoin all parts except the last one
+    keyword = ' '.join(keyword_parts[:-1])
+    image_url = get_wikipedia_image(keyword)
+    if image_url:
+        return jsonify({'imageUrl': image_url})
+    else:
+        return jsonify({'imageUrl': 'static/images/placeholder_chef.png'})
 
 if __name__ == '__main__':
     app.run()
