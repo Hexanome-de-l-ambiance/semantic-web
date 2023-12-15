@@ -1,3 +1,4 @@
+import random
 from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
@@ -66,14 +67,16 @@ def get_list_french_dishes():
 
 def get_random_french_dish():
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
-    query = """
+    offset = random.randint(0, 50)
+
+    query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
     PREFIX dbc: <http://dbpedia.org/resource/Category:>
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
     SELECT ?dish ?name ?image ?description (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
-    WHERE {
+    WHERE {{
         ?dish dct:subject dbc:French_cuisine.
         ?dish rdfs:label ?name.
         ?dish a dbo:Food.
@@ -93,11 +96,12 @@ def get_random_french_dish():
             ?dish dbp:mainIngredient ?mainIngredient.
             FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
         }}
-    }
-    ORDER BY RAND()
+    }}
+    OFFSET {offset}
     LIMIT 1
 
     """
+    print(query)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
@@ -440,7 +444,6 @@ def get_french_dishes_by_region(region):
     if cuisine_by_region is None:
         return []
     cuisine_by_region_space = cuisine_by_region.replace("_", " ")
-
 
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     query = f"""
