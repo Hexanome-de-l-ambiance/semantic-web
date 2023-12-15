@@ -629,38 +629,65 @@
 					</path>
 				</g>
 			</svg>
-		</div>
 
-		<div class="centered-content">
-			<p>https://github.com/regisenguehard/carte-france-svg</p>
-		</div>
+    </div>
 
-		<script>
-			document.querySelectorAll('.region').forEach(function (region) {
-				region.addEventListener('mouseover', function (event) {
-					const tooltip = document.getElementById('tooltip');
-					tooltip.innerHTML = event.currentTarget.getAttribute('data-nom');
-					tooltip.style.color = 'blue';
-					tooltip.style.display = 'block';
-					tooltip.style.left = (event.pageX + 10) + 'px'; // Offset by 10 pixels
-					tooltip.style.top = (event.pageY + 10) + 'px'; // Offset by 10 pixels
-				});
+    <div class="centered-content">
+        <p>https://github.com/regisenguehard/carte-france-svg</p>
+    </div>
 
-				region.addEventListener('mouseout', function () {
-					document.getElementById('tooltip').style.display = 'none';
-				});
-			});
+    <script>
+        document.querySelectorAll('.region').forEach(function (region) {
+            region.addEventListener('mouseover', function (event) {
+                const tooltip = document.getElementById('tooltip');
+                tooltip.innerHTML = event.currentTarget.getAttribute('data-nom');
+                tooltip.style.color = 'blue';
+                tooltip.style.display = 'block';
+                tooltip.style.left = (event.pageX + 10) + 'px'; // Offset by 10 pixels
+                tooltip.style.top = (event.pageY + 10) + 'px'; // Offset by 10 pixels
+            });
 
-			document.querySelectorAll('.region').forEach(function (region) {
-				region.addEventListener('click', function (event) {
-					const regionName = event.currentTarget.getAttribute('data-nom');
-					document.getElementById('regionName').value = regionName;
-					document.getElementById('regionForm').submit();
-				});
-			});
+            region.addEventListener('mouseout', function () {
+                document.getElementById('tooltip').style.display = 'none';
+            });
+        });
+
+        document.querySelectorAll('.region').forEach(function (region) {
+            region.addEventListener('click', function (event) {
+                const regionName = event.currentTarget.getAttribute('data-nom');
+                document.getElementById('regionName').value = regionName;
+                document.getElementById('regionForm').submit();
+            });
+        });
 
 
-		</script>
+    </script>
+    <!-- jQuery -->
+    <script src="../static/js/jquery.min.js"></script>
+    <!-- jQuery Easing -->
+    <script src="../static/js/jquery.easing.1.3.js"></script>
+    <!-- Bootstrap -->
+    <script src="../static/js/bootstrap.min.js"></script>
+    <!-- Waypoints -->
+    <script src="../static/js/jquery.waypoints.min.js"></script>
+    <!-- Waypoints -->
+    <script src="../static/js/jquery.stellar.min.js"></script>
+    <!-- Flexslider -->
+    <script src="../static/js/jquery.flexslider-min.js"></script>
+    <!-- Main -->
+    <script src="../static/js/main.js"></script>
+
+
+    <script>
+        window.onload = function() {
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    alert("{{ messages[0] }}");
+                {% endif %}
+            {% endwith %}
+        };
+    </script>
+
 
 		<script>
 			document.querySelectorAll('img').forEach(img => {

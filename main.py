@@ -3,6 +3,7 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import re
 import urllib.parse
 import datetime
+import requests
 
 from unidecode import unidecode
 
@@ -737,3 +738,28 @@ def compute_age(birth_date, death_date=None):
             age -= 1
 
     return age
+
+
+def get_wikipedia_image(title):
+    # Step 1: Get the Page ID
+    params = {
+        'action': 'query',
+        'format': 'json',
+        'titles': title,
+        'prop': 'pageimages',
+        'pithumbsize': 500  # Specify the thumbnail size
+    }
+    response = requests.get('https://en.wikipedia.org/w/api.php', params=params)
+    data = response.json()
+
+    # Extract page ID
+    page = next(iter(data['query']['pages'].values()))
+
+    # Step 2: Get the Image URL
+    if 'thumbnail' in page:
+        image_url = page['thumbnail']['source']
+        return image_url
+    else:
+        return None
+
+
