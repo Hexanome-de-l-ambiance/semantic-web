@@ -6,7 +6,8 @@ import datetime
 from unidecode import unidecode
 
 
-all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods", "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
+all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods",
+                  "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
 
 
 def get_list_french_dishes():
@@ -229,7 +230,7 @@ def get_dish_by_id(dish_id):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient ?variant
     WHERE {{
         ?dish dct:subject dbc:French_cuisine;
         rdfs:label ?name;
@@ -252,6 +253,11 @@ def get_dish_by_id(dish_id):
             ?dish dbp:mainIngredient ?mainIngredient.
             FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
         }}
+        
+        # Retrieve variants of this dish
+        OPTIONAL {{
+            ?dish dbp:variations ?variant.
+        }}
 
 
     }}
@@ -271,7 +277,8 @@ def get_dish_by_id(dish_id):
             'description': result["description"]["value"] if "description" in result else '',
             # List to store ingredients
             'ingredients': result["ingredients"]["value"].split(", "),
-            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
+            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else "",
+            'variant': result["variant"]["value"] if "variant" in result else "",
         }
 
         dishes.append(dish_info)
@@ -414,22 +421,26 @@ def get_restaurant_by_link(restaurant_url):
 region_to_cuisine = {
     "occitanie": "Occitan_cuisine",
     "normandie": "Norman_cuisine",
-    "provence-alpes-cote d'azur": "Cuisine_of_Provence",
+    "provence-alpes-côte d'azur": "Cuisine_of_Provence",
     "hauts-de-france": "Picardy_cuisine",
-    "grand_est": "Alsatian_cuisine",
-    "auvergne-rhone-alpes": "Cuisine_of_Auvergne-Rhône-Alpes",
+    "grand est": "Alsatian_cuisine",
+    "auvergne-rhône-alpes": "Cuisine_of_Auvergne-Rhône-Alpes",
     "corse": "Corsican_cuisine",
     "nouvelle-aquitaine": "Basque_cuisine",
     "bretagne": "Breton_cuisine",
     "bourgogne-franche-comté": "Cuisine_of_Haute-Saône"
 }
 
+
 def get_french_dishes_by_region(region):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     cuisine_by_region = region_to_cuisine.get(region.lower())
+
+    if cuisine_by_region is None:
+        return []
     cuisine_by_region_space = cuisine_by_region.replace("_", " ")
-    print(cuisine_by_region)
+
 
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     query = f"""
@@ -483,9 +494,11 @@ def get_french_dishes_by_region(region):
         dishes.append(dish_info)
     return dishes
 
+
 def get_region_info_link(region):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
-    region_formatted = region.replace(" ", "_")  # Replace spaces with underscores for DBpedia resource format
+    # Replace spaces with underscores for DBpedia resource format
+    region_formatted = region.replace(" ", "_")
 
     query = f"""
     PREFIX dbr: <http://dbpedia.org/resource/>
@@ -517,14 +530,6 @@ def get_region_info_link(region):
 
     else:
         return "No information found for the specified region."
-
-# Example usage:
-
-
-
-# Example usage
-# french_dishes = get_french_dishes()
-# print(french_dishes)
 
 
 def split_list_into_portions(dishes):
