@@ -637,10 +637,20 @@
         document.querySelectorAll('img').forEach(img => {
             img.addEventListener('error', () => {
                 console.log('Image failed to load.');
-                img.src = 'static/images/placeholder.png'; // Set fallback image
+                img.src = 'static/images/placeholder_cuisine.png'; // Set fallback image
             });
         });
     </script>
+    <script>
+        window.onload = function() {
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    alert("{{ messages[0] }}");
+                {% endif %}
+            {% endwith %}
+        };
+    </script>
+
 </body>
 
 </html>
