@@ -472,8 +472,6 @@ def get_restaurant_by_link(restaurant_url):
         }
 
         return chef_info
-    else:
-        return None
 
 
 region_to_cuisine = {

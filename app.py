@@ -61,7 +61,7 @@ def about_chef():
 
 @app.route('/about_restaurant', methods=['GET'])
 def about_restaurant():
-    restaurant_name = request.args.get('restaurant_link', '')
+    restaurant_name = request.args.get('restaurant_link', 'http://dbpedia.org/resource/Arpège_(restaurant)')
     restaurant = get_restaurant_by_link(restaurant_name)
     return render_template('about_restaurant.html', restaurant=restaurant)
 
