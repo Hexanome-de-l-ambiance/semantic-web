@@ -42,7 +42,8 @@ def about_cuisine():
     dish_name = request.args.get('dish_link', '')
     dish = get_dish_by_link(dish_name)
     reco = get_reco_by_link(dish_name)
-    return render_template('about_cuisine.html', dish=dish, reco=reco)
+    portions = split_reco_into_2_portions_of_length_3(reco)
+    return render_template('about_cuisine.html', dish=dish, reco1=portions[0], reco2=portions[1])
 
 
 @app.route('/about_ingredient', methods=['GET'])

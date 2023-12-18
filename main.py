@@ -693,6 +693,18 @@ def split_list_into_portions(dishes):
 
  # partie sur l'autocomplétion
 
+def split_reco_into_2_portions_of_length_3(dishes):
+    portions = [[], []]  # Initializing portions as a list of two empty lists
+
+    if len(dishes) >= 3:
+        portions[0] = dishes[:3]
+        portions[1] = dishes[3:]
+    else:
+        portions[0] = dishes
+        portions[1] = []
+
+    return portions
+
 
 def autocomplete_french_dishes(search_term):
     if len(search_term) < 3:
@@ -827,7 +839,7 @@ def get_reco_by_link(dish_url):
     }}
     GROUP BY ?otherFood ?name ?image
     ORDER BY DESC(?sharedIngredientCount)
-    LIMIT 5
+    LIMIT 6
     """
 
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")

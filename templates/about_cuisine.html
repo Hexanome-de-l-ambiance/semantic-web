@@ -116,10 +116,25 @@
                     </div>
                 </div>
                 <div class="fh5co-heading">
-                    {% if reco %}
+                    {% if reco1 %}
                     <h2>Similar dishes</h2>
                     <div class="row">
-                        {% for reco_info in reco %}
+                        {% for reco_info in reco1 %}
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="fh5co-item animate-box">
+                                    <img src="{{ reco_info.image }}" class="img-responsive"
+                                        alt="{{ reco_info.name }} Image">
+                                    <h3><a href="/about_cuisine?dish_link={{ reco_info.link }}">{{ reco_info.name }}</a>
+                                    </h3>
+                                    <p></p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="row">
+                        {% for reco_info in reco2 %}
                         <div class="col-md-4">
                             <div class="card mb-4">
                                 <div class="fh5co-item animate-box">
