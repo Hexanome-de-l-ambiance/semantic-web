@@ -2086,3 +2086,24 @@ footer {
     box-sizing: border-box;
     padding: 0 10px;
 }
+
+
+.scroll-down-indicator {
+    position: absolute;
+
+    bottom: 20px;
+    left: 50%;
+
+    transform: translateX(-50%);
+    /* Rest of your CSS for animation and styling */
+}
+
+.scroll-down-indicator img {
+    width: 120px;  /* Adjust the width as needed */
+    height: auto;
+    animation: bounce 2s;
+}
+
+html {
+    scroll-behavior: smooth;
+}
