@@ -5,4 +5,4 @@
 - [ ] Page redirection based on type (dish, ingredient, chef, restaurant) (done)
 - [ ] Recommendation : maybe limit to 2-3 (to avoid non similar dishes)
 
-- [ ] There are some link dbpedia which is broken: for example, http://dbpedia.org/resource/Arpège_(restaurant), we cannot get any information from this link using the query.
+- [ ] There are some link dbpedia which is broken: for example, http://dbpedia.org/resource/La_Belle_Assiette&chef_id, we cannot get any information from this link using the query.

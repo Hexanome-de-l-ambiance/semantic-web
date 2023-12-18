@@ -55,14 +55,20 @@ def about_ingredient():
 @app.route('/about_chef', methods=['GET'])
 def about_chef():
     chef_name = request.args.get('chef_link', '')
+    chef_id = request.args.get('chef_id', '')
     chef = get_chef_by_link(chef_name)
+    if chef is None:
+        chef = get_chef_by_id(chef_id)
     return render_template('about_chef.html', chef=chef)
 
 
 @app.route('/about_restaurant', methods=['GET'])
 def about_restaurant():
-    restaurant_name = request.args.get('restaurant_link', 'http://dbpedia.org/resource/Arpège_(restaurant)')
+    restaurant_name = request.args.get('restaurant_link', '')
+    restaurant_id = request.args.get('restaurant_id', '')
     restaurant = get_restaurant_by_link(restaurant_name)
+    if restaurant is None:
+        restaurant = get_restaurant_by_id(restaurant_id)
     return render_template('about_restaurant.html', restaurant=restaurant)
 
 

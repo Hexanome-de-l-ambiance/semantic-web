@@ -136,7 +136,8 @@ def search_french_dishes(search_term, categories):
         {{
             ?dish dct:subject dbc:{category};
             rdfs:label ?name;
-            dbo:thumbnail ?image.
+            dbo:thumbnail ?image;
+            dbo:wikiPageID ?id.
 
             BIND(dbc:{category} AS ?categoryLink)
             ?categoryLink rdfs:label ?category.
@@ -172,7 +173,7 @@ def search_french_dishes(search_term, categories):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?category ?name ?description ?image
+    SELECT ?dish ?category ?name ?description ?image ?id
     WHERE {{
         {union_patterns}
     }}
@@ -190,6 +191,7 @@ def search_french_dishes(search_term, categories):
         dish_info = {
             'name': result["name"]["value"],
             'link': result["dish"]["value"],
+            'id': result["id"]["value"],
             'category': result["category"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
@@ -394,7 +396,7 @@ def get_chef_by_link(chef_url):
 
     SELECT ?name ?description ?image ?birthPlace ?birthDate ?deathDate
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name;
+        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name;
         dbo:birthPlace ?birthPlaceLink;
         dbo:birthDate ?birthDate.
         ?birthPlaceLink rdfs:label ?birthPlace.
@@ -436,6 +438,57 @@ def get_chef_by_link(chef_url):
     else:
         return None
 
+def get_chef_by_id(chef_id):
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?chef ?name ?description ?image ?birthPlace ?birthDate ?deathDate
+    WHERE {{
+        ?chef rdfs:label ?name;
+        dbo:birthPlace ?birthPlaceLink;
+        dbo:birthDate ?birthDate;
+        dbo:wikiPageID ?id.
+        ?birthPlaceLink rdfs:label ?birthPlace.
+        
+        Filter (?id = {chef_id})
+        FILTER(LANG(?name) = "en")
+
+        OPTIONAL {{ ?chef dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
+        OPTIONAL {{ ?chef dbo:deathDate ?deathDate.}}
+    }}
+    LIMIT 1
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
+        result = results["results"]["bindings"][0]
+
+        chef_info = {
+            'name': result["name"]["value"],
+            'link': result["chef"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+            'birthPlace': result["birthPlace"]["value"] if "birthPlace" in result else '',
+            'birthDate': result["birthDate"]["value"] if "birthDate" in result else None,
+            'deathDate': result["deathDate"]["value"] if "deathDate" in result else None,
+        }
+        if (chef_info['birthDate'] and chef_info['deathDate']):
+            chef_info['age'] = compute_age(
+                chef_info['birthDate'], chef_info['deathDate'])
+        elif (chef_info['birthDate']):
+            chef_info['age'] = compute_age(chef_info['birthDate'])
+        else:
+            chef_info['age'] = None
+
+        return chef_info
+    else:
+        return None
 
 def get_restaurant_by_link(restaurant_url):
     # Extract the resource identifier from the DBpedia URL
@@ -449,7 +502,7 @@ def get_restaurant_by_link(restaurant_url):
 
     SELECT ?name ?description ?image
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> dbp:name ?name.
+        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name.
         FILTER(LANG(?name) = "en")
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en").}}
     }}
@@ -472,7 +525,44 @@ def get_restaurant_by_link(restaurant_url):
         }
 
         return chef_info
+    else:
+        return None
 
+def get_restaurant_by_id(restaurant_id):
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?restaurant ?name ?description ?image
+    WHERE {{
+        ?restaurant rdfs:label ?name;
+        dbo:wikiPageID ?id.
+        FILTER(LANG(?name) = "en")
+        OPTIONAL {{ ?restaurant dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en").}}
+        FILTER (?id = {restaurant_id})
+    }}
+    LIMIT 1
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
+        result = results["results"]["bindings"][0]
+
+        chef_info = {
+            'name': result["name"]["value"],
+            'link': result["restaurant"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+        }
+
+        return chef_info
+    else:
+        return None
 
 region_to_cuisine = {
     "occitanie": "Occitan_cuisine",
