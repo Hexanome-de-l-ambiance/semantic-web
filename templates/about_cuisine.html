@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
     <link href="https://fonts.googleapis.com/css?family=Cormorant+Garamond:300,300i,400,400i,500,600i,700"
-          rel="stylesheet">
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Satisfy" rel="stylesheet">
 
     <!-- Animate.css -->
@@ -32,147 +32,157 @@
 
 <body>
 
-<div class="fh5co-loader"></div>
+    <div class="fh5co-loader"></div>
 
-<div id="page">
-    <nav class="fh5co-nav" role="navigation">
-        <!-- <div class="top-menu"> -->
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-12 text-center logo-wrap">
-                    <div id="fh5co-logo"><a href="/">French cuisine<span></span></a></div>
-                </div>
-                <div class="col-xs-12 text-center menu-1 menu-wrap">
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/list">List</a></li>
-                        <li><a href="/random">Random dish</a></li>
-                    </ul>
-                </div>
-            </div>
-
-        </div>
-        <!-- </div> -->
-    </nav>
-
-    <header id="fh5co-header" class="fh5co-cover js-fullheight" role="banner"
-            style="background-image: url(../static/images/hero_1.jpeg);" data-stellar-background-ratio="0.5">
-        <div class="overlay"></div>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <div class="display-t js-fullheight">
-                        <div class="display-tc js-fullheight animate-box" data-animate-effect="fadeIn">
-                            <h1>{{ dish.name }}</h1>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div id="fh5co-about" class="fh5co-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 col-md-push-1 img-wrap animate-box" data-animate-effect="fadeInLeft">
-                    <img src="{{ dish.image }}" alt="{{ dish.name }} Image">
-                </div>
-                <div class="col-md-5 col-md-push-1 animate-box">
-                    <div class="section-heading">
-                        <h2>Description</h2>
-                        <p>{{ dish.description }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="fh5co-featured-testimony" class="fh5co-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 fh5co-heading">
-                    <h2>Ingredients</h2>
-                    <div class="row">
-                        <div class="col-md-6">
-                            {% if dish.mainIngredient %}
-                                <p>{{ dish.mainIngredient }}</p>
-                            {% else %}
-                                {% for ingredient_info in dish.ingredients %}
-                                    {% set parts = ingredient_info.split(' - ') %}
-                                    <a href="/about_ingredient?ingredient_link={{ parts[1] }}">{{ parts[0] }}</a>
-                                    <p></p>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="fh5co-heading">
-                {% if reco %}
-                <h2>Similar dishes</h2>
+    <div id="page">
+        <nav class="fh5co-nav" role="navigation">
+            <!-- <div class="top-menu"> -->
+            <div class="container">
                 <div class="row">
+                    <div class="col-xs-12 text-center logo-wrap">
+                        <div id="fh5co-logo"><a href="/">French cuisine<span></span></a></div>
+                    </div>
+                    <div class="col-xs-12 text-center menu-1 menu-wrap">
+                        <ul>
+                            <li><a href="/">Home</a></li>
+                            <li><a href="/list">List</a></li>
+                            <li><a href="/random">Random dish</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <!-- </div> -->
+        </nav>
+
+        <header id="fh5co-header" class="fh5co-cover js-fullheight" role="banner"
+            style="background-image: url(../static/images/hero_1.jpeg);" data-stellar-background-ratio="0.5">
+            <div class="overlay"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <div class="display-t js-fullheight">
+                            <div class="display-tc js-fullheight animate-box" data-animate-effect="fadeIn">
+                                <h1>{{ dish.name }}</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="fh5co-about" class="fh5co-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 col-md-push-1 img-wrap animate-box" data-animate-effect="fadeInLeft">
+                        <img src="{{ dish.image }}" alt="{{ dish.name }} Image">
+                    </div>
+                    <div class="col-md-5 col-md-push-1 animate-box">
+                        <div class="section-heading">
+                            <h2>Description</h2>
+                            <p>{{ dish.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fh5co-featured-testimony" class="fh5co-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 fh5co-heading">
+                        <h2>Ingredients</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% if dish.mainIngredient %}
+                                <p>{{ dish.mainIngredient }}</p>
+                                {% else %}
+                                {% for ingredient_info in dish.ingredients %}
+                                {% set parts = ingredient_info.split(' - ') %}
+                                <a href="/about_ingredient?ingredient_link={{ parts[1] }}">{{ parts[0] }}</a>
+                                <p></p>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 fh5co-heading">
+                        <h2>Link dbpedia</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><a href="{{ dish.link }}">{{ dish.name }}</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fh5co-heading">
+                    {% if reco %}
+                    <h2>Similar dishes</h2>
+                    <div class="row">
                         {% for reco_info in reco %}
-                            <div class="col-md-4">
-                                <div class="card mb-4">
-                                    <div class="fh5co-item animate-box">
-                                        <img src="{{ reco_info.image }}" class="img-responsive" alt="{{ reco_info.name }} Image">
-                                        <h3><a href="/about_cuisine?dish_link={{ reco_info.link }}">{{ reco_info.name }}</a></h3>
-                                        <p></p>
-                                    </div>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="fh5co-item animate-box">
+                                    <img src="{{ reco_info.image }}" class="img-responsive"
+                                        alt="{{ reco_info.name }} Image">
+                                    <h3><a href="/about_cuisine?dish_link={{ reco_info.link }}">{{ reco_info.name }}</a>
+                                    </h3>
+                                    <p></p>
                                 </div>
                             </div>
+                        </div>
                         {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
+
             </div>
-
         </div>
-    </div>
 
-    <!-- jQuery -->
-    <script src="../static/js/jquery.min.js"></script>
-    <!-- jQuery Easing -->
-    <script src="../static/js/jquery.easing.1.3.js"></script>
-    <!-- Bootstrap -->
-    <script src="../static/js/bootstrap.min.js"></script>
-    <!-- Waypoints -->
-    <script src="../static/js/jquery.waypoints.min.js"></script>
-    <!-- Waypoints -->
-    <script src="../static/js/jquery.stellar.min.js"></script>
-    <!-- Flexslider -->
-    <script src="../static/js/jquery.flexslider-min.js"></script>
-    <!-- Main -->
-    <script src="../static/js/main.js"></script>
+        <!-- jQuery -->
+        <script src="../static/js/jquery.min.js"></script>
+        <!-- jQuery Easing -->
+        <script src="../static/js/jquery.easing.1.3.js"></script>
+        <!-- Bootstrap -->
+        <script src="../static/js/bootstrap.min.js"></script>
+        <!-- Waypoints -->
+        <script src="../static/js/jquery.waypoints.min.js"></script>
+        <!-- Waypoints -->
+        <script src="../static/js/jquery.stellar.min.js"></script>
+        <!-- Flexslider -->
+        <script src="../static/js/jquery.flexslider-min.js"></script>
+        <!-- Main -->
+        <script src="../static/js/main.js"></script>
         <script>
-    document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', () => {
-            if (!img.src.endsWith('placeholder_cuisine.png')) {  // Check to prevent looping
-                // Immediately set to placeholder image
-                img.src = 'static/images/placeholder_cuisine.png';
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', () => {
+                    if (!img.src.endsWith('placeholder_cuisine.png')) {  // Check to prevent looping
+                        // Immediately set to placeholder image
+                        img.src = 'static/images/placeholder_cuisine.png';
 
-                // Fetch image after a delay
-                setTimeout(() => {
-                    fetchImageFromWikipedia(img);
-                }, 1000); // Delay of 1 second
-            }
-        });
-    });
-
-    function fetchImageFromWikipedia(img) {
-        let keyword = encodeURIComponent(img.alt);
-        fetch(`/fetch-wikipedia-image?keyword=${keyword}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.imageUrl) {
-                    img.src = data.imageUrl;
-                } // No need for else, as it's already set to placeholder
-            })
-            .catch(error => {
-                console.error('Error fetching Wikipedia image:', error);
-                // The image is already set to placeholder in case of error
+                        // Fetch image after a delay
+                        setTimeout(() => {
+                            fetchImageFromWikipedia(img);
+                        }, 1000); // Delay of 1 second
+                    }
+                });
             });
-    }
-</script>
+
+            function fetchImageFromWikipedia(img) {
+                let keyword = encodeURIComponent(img.alt);
+                fetch(`/fetch-wikipedia-image?keyword=${keyword}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.imageUrl) {
+                            img.src = data.imageUrl;
+                        } // No need for else, as it's already set to placeholder
+                    })
+                    .catch(error => {
+                        console.error('Error fetching Wikipedia image:', error);
+                        // The image is already set to placeholder in case of error
+                    });
+            }
+        </script>
 
 </body>
 
