@@ -79,7 +79,13 @@
                         {% for dish in portion1 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
+                            {% if dish.category == 'Chefs of French cuisine' %}
+                            <h3><a href="/about_chef?chef_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% elif dish.category == 'French restaurants' %}
+                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% else %}
                             <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% endif %}                            
                             <p>{{ dish.description }}</p>
                         </div>
                         {% endfor %}
@@ -88,7 +94,13 @@
                         {% for dish in portion2 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
+                            {% if dish.category == 'Chefs of French cuisine' %}
+                            <h3><a href="/about_chef?chef_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% elif dish.category == 'French restaurants' %}
+                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% else %}
                             <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% endif %}
                             <p>{{ dish.description }}</p>
                         </div>
                         {% endfor %}
@@ -98,7 +110,13 @@
                         {% for dish in portion3 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
+                            {% if dish.category == 'Chefs of French cuisine' %}
+                            <h3><a href="/about_chef?chef_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% elif dish.category == 'French restaurants' %}
+                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% else %}
                             <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% endif %}
                             <p>{{ dish.description }}</p>
                         </div>
                         {% endfor %}
@@ -107,7 +125,13 @@
                         {% for dish in portion4 %}
                         <div class="fh5co-item animate-box">
                             <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
+                            {% if dish.category == 'Chefs of French cuisine' %}
+                            <h3><a href="/about_chef?chef_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% elif dish.category == 'French restaurants' %}
+                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% else %}
                             <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
+                            {% endif %}
                             <p>{{ dish.description }}</p>
                         </div>
                         {% endfor %}
@@ -136,36 +160,36 @@
         <script src="../static/js/jquery.flexslider-min.js"></script>
         <!-- Main -->
         <script src="../static/js/main.js"></script>
-<script>
-    document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('error', () => {
-            if (!img.src.endsWith('placeholder_cuisine.png')) {  // Check to prevent looping
-                // Immediately set to placeholder image
-                img.src = 'static/images/placeholder_cuisine.png';
+        <script>
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', () => {
+                    if (!img.src.endsWith('placeholder_cuisine.png')) {  // Check to prevent looping
+                        // Immediately set to placeholder image
+                        img.src = 'static/images/placeholder_cuisine.png';
 
-                // Fetch image after a delay
-                setTimeout(() => {
-                    fetchImageFromWikipedia(img);
-                }, 1000); // Delay of 1 second
-            }
-        });
-    });
-
-    function fetchImageFromWikipedia(img) {
-        let keyword = encodeURIComponent(img.alt);
-        fetch(`/fetch-wikipedia-image?keyword=${keyword}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.imageUrl) {
-                    img.src = data.imageUrl;
-                } // No need for else, as it's already set to placeholder
-            })
-            .catch(error => {
-                console.error('Error fetching Wikipedia image:', error);
-                // The image is already set to placeholder in case of error
+                        // Fetch image after a delay
+                        setTimeout(() => {
+                            fetchImageFromWikipedia(img);
+                        }, 1000); // Delay of 1 second
+                    }
+                });
             });
-    }
-</script>
+
+            function fetchImageFromWikipedia(img) {
+                let keyword = encodeURIComponent(img.alt);
+                fetch(`/fetch-wikipedia-image?keyword=${keyword}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.imageUrl) {
+                            img.src = data.imageUrl;
+                        } // No need for else, as it's already set to placeholder
+                    })
+                    .catch(error => {
+                        console.error('Error fetching Wikipedia image:', error);
+                        // The image is already set to placeholder in case of error
+                    });
+            }
+        </script>
 
 </body>
 

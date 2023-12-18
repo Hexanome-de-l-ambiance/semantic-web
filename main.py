@@ -101,7 +101,6 @@ def get_random_french_dish():
     LIMIT 1
 
     """
-    print(query)
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
@@ -137,10 +136,12 @@ def search_french_dishes(search_term, categories):
         {{
             ?dish dct:subject dbc:{category};
             rdfs:label ?name;
-            dbo:thumbnail ?image;
-            dbo:wikiPageID ?id.
+            dbo:thumbnail ?image.
 
-            FILTER(LANG(?name) = "en")
+            BIND(dbc:{category} AS ?categoryLink)
+            ?categoryLink rdfs:label ?category.
+            FILTER(LANG(?name) = "en" && LANG(?category) = "en")
+    
             OPTIONAL {{ ?dish dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
             BIND(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(str(?dish),
             "à", "a"),
@@ -161,18 +162,6 @@ def search_french_dishes(search_term, categories):
             "Î", "I") AS ?modifiedDish)
     
             FILTER regex(REPLACE(str(?modifiedDish), "[^a-zA-Z0-9]", "", "i"), "{re.escape(safe_search_term)}", "i")
-
-            # Retrieve ingredients and their links
-            OPTIONAL {{ 
-                ?dish dbo:ingredient ?ingredient.
-                ?ingredient rdfs:label ?ingredientName.
-                FILTER(LANG(?ingredientName) = "en")
-            }}
-
-            OPTIONAL {{
-                ?dish dbp:mainIngredient ?mainIngredient.
-                FILTER NOT EXISTS {{ ?dish dbo:ingredient ?ingredient }}
-            }}
         }}
         """ for category in categories
     ])
@@ -183,7 +172,7 @@ def search_french_dishes(search_term, categories):
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
 
-    SELECT ?dish ?id ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
+    SELECT ?dish ?category ?name ?description ?image
     WHERE {{
         {union_patterns}
     }}
@@ -201,14 +190,11 @@ def search_french_dishes(search_term, categories):
         dish_info = {
             'name': result["name"]["value"],
             'link': result["dish"]["value"],
-            'id': result["id"]["value"],
+            'category': result["category"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
-            # List to store ingredients
-            'ingredients': result["ingredients"]["value"].split(", "),
-            'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
-        }
 
+        }
         dishes.append(dish_info)
     return dishes
 
@@ -774,25 +760,27 @@ def get_reco_by_link(dish_url):
 
 
 def get_wikipedia_image(title):
-    # Step 1: Get the Page ID
-    params = {
-        'action': 'query',
-        'format': 'json',
-        'titles': title,
-        'prop': 'pageimages',
-        'pithumbsize': 500  # Specify the thumbnail size
-    }
-    response = requests.get('https://en.wikipedia.org/w/api.php', params=params)
-    data = response.json()
+    try:
+        # Step 1: Get the Page ID
+        params = {
+            'action': 'query',
+            'format': 'json',
+            'titles': title,
+            'prop': 'pageimages',
+            'pithumbsize': 500  # Specify the thumbnail size
+        }
+        response = requests.get('https://en.wikipedia.org/w/api.php', params=params)
+        data = response.json()
 
-    # Extract page ID
-    page = next(iter(data['query']['pages'].values()))
-
-    # Step 2: Get the Image URL
-    if 'thumbnail' in page:
-        image_url = page['thumbnail']['source']
-        return image_url
-    else:
+        # Extract page ID
+        pages = data.get('query', {}).get('pages', {})
+        if pages:
+            page = next(iter(pages.values()))
+            # Step 2: Get the Image URL
+            if 'thumbnail' in page:
+                image_url = page['thumbnail'].get('source')
+                return image_url
+    except Exception as e:
         return None
 
 
