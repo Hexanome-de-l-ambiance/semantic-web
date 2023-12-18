@@ -70,78 +70,35 @@
                 </div>
             </div>
         </header>
-
         <div id="fh5co-featured-menu" class="fh5co-section">
             <div class="container">
                 <div class="row">
-
+                    {% for portion in portions %}
                     <div class="col-md-3 col-sm-6 col-xs-6 col-xxs-12 fh5co-item-wrap">
-                        {% for dish in portion1 %}
+                        {% for item in portion %}
                         <div class="fh5co-item animate-box">
-                            <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            {% if dish.category == 'Chefs of French cuisine' %}
-                            <h3><a href="/about_chef?chef_link={{ dish.link }}&chef_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% elif dish.category == 'French restaurants' %}
-                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}&restaurant_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% else %}
-                            <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
-                            {% endif %}                            
-                            <p>{{ dish.description }}</p>
+                            <img src="{{ item.image }}" class="img-responsive" alt="{{ item.name }} Image">
+                            <h3>
+                                {% if item.type == 'dish' %}
+                                <a href="/about_cuisine?dish_id={{ item.id }}">{{ item.name }}</a>
+                                {% elif item.type == 'chef' %}
+                                <a href="/about_chef?chef_link={{ item.link }}">{{ item.name }}</a>
+                                {% elif item.type == 'restaurant' %}
+                                <a href="/about_restaurant?restaurant_link={{ item.link }}">{{ item.name }}</a>
+                                {% endif %}
+                            </h3>
+                            <p> Description : </p>
+                            <p>{{ item.description }}</p>
                         </div>
                         {% endfor %}
                     </div>
-                    <div class="col-md-3 col-sm-6 col-xs-6 col-xxs-12 fh5co-item-wrap">
-                        {% for dish in portion2 %}
-                        <div class="fh5co-item animate-box">
-                            <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            {% if dish.category == 'Chefs of French cuisine' %}
-                            <h3><a href="/about_chef?chef_link={{ dish.link }}&chef_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% elif dish.category == 'French restaurants' %}
-                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}&restaurant_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% else %}
-                            <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
-                            {% endif %}
-                            <p>{{ dish.description }}</p>
-                        </div>
-                        {% endfor %}
-                    </div>
+                    {% if loop.index % 2 == 0 %}
                     <div class="clearfix visible-sm-block visible-xs-block"></div>
-                    <div class="col-md-3 col-sm-6 col-xs-6 col-xxs-12 fh5co-item-wrap">
-                        {% for dish in portion3 %}
-                        <div class="fh5co-item animate-box">
-                            <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            {% if dish.category == 'Chefs of French cuisine' %}
-                            <h3><a href="/about_chef?chef_link={{ dish.link }}&chef_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% elif dish.category == 'French restaurants' %}
-                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}&restaurant_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% else %}
-                            <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
-                            {% endif %}
-                            <p>{{ dish.description }}</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="col-md-3 col-sm-6 col-xs-6 col-xxs-12 fh5co-item-wrap">
-                        {% for dish in portion4 %}
-                        <div class="fh5co-item animate-box">
-                            <img src="{{ dish.image }}" class="img-responsive" alt="{{ dish.name }} Image">
-                            {% if dish.category == 'Chefs of French cuisine' %}
-                            <h3><a href="/about_chef?chef_link={{ dish.link }}&chef_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% elif dish.category == 'French restaurants' %}
-                            <h3><a href="/about_restaurant?restaurant_link={{ dish.link }}&restaurant_id={{ dish.id }}">{{ dish.name }}</a></h3>
-                            {% else %}
-                            <h3><a href="/about_cuisine?dish_link={{ dish.link }}">{{ dish.name }}</a></h3>
-                            {% endif %}
-                            <p>{{ dish.description }}</p>
-                        </div>
-                        {% endfor %}
-                    </div>
+                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
-
-
-
         <div class="gototop js-top">
             <a href="#" class="js-gotop"><i class="icon-arrow-up22"></i></a>
         </div>

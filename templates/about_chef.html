@@ -74,14 +74,21 @@
         <div id="fh5co-about" class="fh5co-section">
             <div class="container">
                 <div class="row">
+                    {% if chef.image %}
                     <div class="col-md-6 col-md-push-1 img-wrap animate-box" data-animate-effect="fadeInLeft">
+
                         <img src="{{ chef.image }}" alt="{{ chef.name }} Image">
+
                     </div>
+                    {% endif %}
                     <div class="col-md-5 col-md-push-1 animate-box">
                         <div class="section-heading">
+                            {% if chef.description %}
                             <h2>Description</h2>
                             <p>{{ chef.description }}</p>
-                            
+                            {% endif %}
+
+                            {% if chef.birthDate %}
                             <h2>Birth date</h2>
                             <p>
                                 {{ chef.birthDate }}
@@ -89,15 +96,28 @@
                                 (age {{ chef.age }})
                                 {% endif %}
                             </p>
+                            {% endif %}
 
                             {% if chef.deathDate %}
                             <h2>Death date</h2>
                             <p>{{ chef.deathDate }} (aged {{chef.age}})</p>
                             {% endif %}
 
+                            {% if chef.birthPlace %}
                             <h2>Birth Place</h2>
                             <p>{{ chef.birthPlace }}</p>
 
+                            {% endif %}
+
+                            {% if chef.restaurants or chef.prevrests %}
+                                <h2>Restaurants</h2>
+                                {%  if chef.restaurants %}
+                                    <p>{{ chef.restaurants }}</p>
+                                {% endif %}
+                                {% if chef.prevrests %}
+                                    <p>{{ chef.prevrests }}</p>
+                                {% endif %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>

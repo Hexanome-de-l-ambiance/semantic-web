@@ -7,9 +7,10 @@ import requests
 
 from unidecode import unidecode
 
-
-all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods",
-                  "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
+all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes",
+                  "French_pastries", "French_snacks_foods",
+                  "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses",
+                  "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
 
 
 def get_list_french_dishes():
@@ -112,6 +113,7 @@ def get_random_french_dish():
             'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
+            'type': 'dish',
             # List to store ingredients
             'ingredients': result["ingredients"]["value"].split(", "),
             'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else ""
@@ -121,13 +123,131 @@ def get_random_french_dish():
 
     return dishes[0]
 
+
+def unified_search(search_term, selected_categories):
+    all_results = []
+
+    if not selected_categories or "all" in selected_categories:
+        all_results.extend(search_french_chefs(search_term))
+        all_results.extend(search_french_restaurants(search_term))
+        all_results.extend(search_french_dishes(search_term, all_categories))
+    else:
+        if "Chefs_of_French_cuisine" in selected_categories:
+            all_results.extend(search_french_chefs(search_term))
+        if "French_restaurants" in selected_categories:
+            all_results.extend(search_french_restaurants(search_term))
+        dish_categories = [cat for cat in selected_categories if
+                           cat not in ["Chefs_of_French_cuisine", "French_restaurants"]]
+        if dish_categories:
+            all_results.extend(search_french_dishes(search_term, dish_categories))
+
+    return all_results
+
+
+def search_about_french_cuisine(search_term: str, criteria: str = "all"):
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+
+    # Sanitize the search term to prevent SPARQL injection
+    safe_search_term = re.escape(search_term)
+
+    query = f"""
+    """
+
+
+def search_french_chefs(search_term):
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    safe_search_term = re.escape(search_term)
+
+    query = f"""
+    PREFIX dbr: <http://dbpedia.org/resource/>
+    PREFIX dbc: <http://dbpedia.org/resource/Category:>
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?chef ?id ?name ?description ?image ?restaurants
+    WHERE {{
+        ?chef dct:subject dbc:French_chefs;
+        rdfs:label ?name;
+        dbo:thumbnail ?image;
+        dbo:wikiPageID ?id.
+        
+
+        FILTER(LANG(?name) = "en")
+        OPTIONAL {{ ?chef dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
+        FILTER regex(str(?name), "{safe_search_term}", "i")
+    }}
+    LIMIT 100
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    chefs = []
+    for result in results["results"]["bindings"]:
+        chef_info = {
+            'name': result["name"]["value"],
+            'link': result["chef"]["value"],
+            'id': result["id"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+            'type': 'chef',
+        }
+
+        chefs.append(chef_info)
+    return chefs
+
+
+def search_french_restaurants(search_term):
+    sparql = SPARQLWrapper("https://dbpedia.org/sparql")
+    safe_search_term = re.escape(search_term)
+
+    query = f"""
+    PREFIX dbr: <http://dbpedia.org/resource/>
+    PREFIX dbc: <http://dbpedia.org/resource/Category:>
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX dct: <http://purl.org/dc/terms/>
+
+    SELECT ?restaurant ?id ?name ?description ?image
+    WHERE {{
+        ?restaurant dct:subject dbc:French_restaurants;
+        rdfs:label ?name;
+        dbo:thumbnail ?image;
+        dbo:wikiPageID ?id.
+
+        FILTER(LANG(?name) = "en")
+        OPTIONAL {{ ?restaurant dbo:abstract ?description. FILTER(LANG(?description) = "en") }}
+        FILTER regex(str(?name), "{safe_search_term}", "i")
+    }}
+    LIMIT 100
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    restaurants = []
+    for result in results["results"]["bindings"]:
+        restaurant_info = {
+            'name': result["name"]["value"],
+            'link': result["restaurant"]["value"],
+            'id': result["id"]["value"],
+            'image': result["image"]["value"] if "image" in result else "",
+            'description': result["description"]["value"] if "description" in result else '',
+            'type': 'restaurant'
+        }
+
+        restaurants.append(restaurant_info)
+    return restaurants
+
+
 def search_french_dishes(search_term, categories):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
 
     # Sanitize the search term to prevent SPARQL injection
     normalized_search_term = unidecode(search_term)
     # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.sub(r'\W+', '', normalized_search_term)    
+    safe_search_term = re.sub(r'\W+', '', normalized_search_term)
     if not categories:
         categories = all_categories
     # Join the categories to create a UNION of patterns for the SPARQL query
@@ -208,7 +328,7 @@ def complete_search_french_dishes(search_term, categories):
     # Sanitize the search term to prevent SPARQL injection
     normalized_search_term = unidecode(search_term)
     # Sanitize the search term to prevent SPARQL injection
-    safe_search_term = re.sub(r'\W+', '', normalized_search_term)       
+    safe_search_term = re.sub(r'\W+', '', normalized_search_term)
     if not categories:
         categories = all_categories
 
@@ -282,6 +402,7 @@ def complete_search_french_dishes(search_term, categories):
     # Return the list of dish names in JSON format
     return dishes
 
+
 def get_dish_by_id(dish_id):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
     query = f"""
@@ -335,6 +456,7 @@ def get_dish_by_id(dish_id):
             'link': result["dish"]["value"],
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
+            'type': 'dish',
             # List to store ingredients
             'ingredients': result["ingredients"]["value"].split(", "),
             'mainIngredient': result["mainIngredient"]["value"] if "mainIngredient" in result else "",
@@ -388,21 +510,24 @@ def get_chef_by_link(chef_url):
     # Extract the resource identifier from the DBpedia URL
     resource_identifier = chef_url.rsplit('/', 1)[-1]
 
-    # SPARQL query to retrieve information about the dish
+    print(resource_identifier)
+    # SPARQL query to retrieve information about the chef
     query = f"""
     PREFIX dbo: <http://dbpedia.org/ontology/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX dct: <http://purl.org/dc/terms/>
+    PREFIX dbp: <http://dbpedia.org/property/>
 
-    SELECT ?name ?description ?image ?birthPlace ?birthDate ?deathDate
+    SELECT ?name ?description ?image ?birthPlace ?birthDate ?deathDate ?restaurants ?prevrests
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name;
-        dbo:birthPlace ?birthPlaceLink;
-        dbo:birthDate ?birthDate.
-        ?birthPlaceLink rdfs:label ?birthPlace.
+        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name.
         
         FILTER(LANG(?name) = "en")
 
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbp:restaurants ?restaurants. FILTER(LANG(?restaurants) = "en") }}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbp:prevrests ?prevrests. FILTER(LANG(?prevrests) = "en") }}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:birthDate ?birthDate. }}
+        OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:birthPlace ?birthPlaceLink. ?birthPlaceLink rdfs:label ?birthPlace. FILTER(LANG(?birthPlace) = "en") }}
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:deathDate ?deathDate.}}
     }}
@@ -413,7 +538,7 @@ def get_chef_by_link(chef_url):
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
-
+    print(results["results"]["bindings"])
     if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
         result = results["results"]["bindings"][0]
 
@@ -423,8 +548,10 @@ def get_chef_by_link(chef_url):
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
             'birthPlace': result["birthPlace"]["value"] if "birthPlace" in result else '',
-            'birthDate': result["birthDate"]["value"] if "birthDate" in result else None,
-            'deathDate': result["deathDate"]["value"] if "deathDate" in result else None,
+            'birthDate': result["birthDate"]["value"] if "birthDate" in result else '',
+            'deathDate': result["deathDate"]["value"] if "deathDate" in result else '',
+            'restaurants': result["restaurants"]["value"] if "restaurants" in result else '',
+            'prevrests': result["prevrests"]["value"] if "prevrests" in result else '',
         }
         if (chef_info['birthDate'] and chef_info['deathDate']):
             chef_info['age'] = compute_age(
@@ -433,10 +560,10 @@ def get_chef_by_link(chef_url):
             chef_info['age'] = compute_age(chef_info['birthDate'])
         else:
             chef_info['age'] = None
-
         return chef_info
     else:
         return None
+
 
 def get_chef_by_id(chef_id):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
@@ -521,12 +648,14 @@ def get_restaurant_by_link(restaurant_url):
             'name': result["name"]["value"],
             'link': restaurant_url,
             'image': result["image"]["value"] if "image" in result else "",
-            'description': result["description"]["value"] if "description" in result else '',
+            'description': result["description"]["value"] if "description" in result else "",
+
         }
 
         return chef_info
     else:
         return None
+
 
 def get_restaurant_by_id(restaurant_id):
     sparql = SPARQLWrapper("https://dbpedia.org/sparql")
@@ -563,6 +692,7 @@ def get_restaurant_by_id(restaurant_id):
         return chef_info
     else:
         return None
+
 
 region_to_cuisine = {
     "occitanie": "Occitan_cuisine",
@@ -691,7 +821,8 @@ def split_list_into_portions(dishes):
 
     return portions
 
- # partie sur l'autocomplétion
+
+# partie sur l'autocomplétion
 
 def split_reco_into_2_portions_of_length_3(dishes):
     portions = [[], []]  # Initializing portions as a list of two empty lists
@@ -882,5 +1013,3 @@ def get_wikipedia_image(title):
                 return image_url
     except Exception as e:
         return None
-
-
