@@ -108,9 +108,9 @@
                 </div>
             </div>
             <div class="fh5co-heading">
+                {% if reco %}
                 <h2>Similar dishes</h2>
                 <div class="row">
-                    {% if reco %}
                         {% for reco_info in reco %}
                             <div class="col-md-4">
                                 <div class="card mb-4">
@@ -122,9 +122,8 @@
                                 </div>
                             </div>
                         {% endfor %}
-                    {% endif %}
                 </div>
-
+                {% endif %}
             </div>
 
         </div>
