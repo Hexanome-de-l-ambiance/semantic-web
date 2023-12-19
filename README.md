@@ -1,8 +1,10 @@
-# To do
+# How to use
 
-- [ ] check the language for dishes namees, descriptions : it has to be coherent
-- [ ] 'Cuisine' search criteria is weird : what is a cuisine ? Should see what to do with it
-- [ ] Page redirection based on type (dish, ingredient, chef, restaurant) (done)
-- [ ] Recommendation : maybe limit to 2-3 (to avoid non similar dishes)
+Our project use flask app of python, make sure you have Python installed. Then, install the required dependencies using pip install -r requirements:
+- Flask
+- urllib3
+- SPARQLWrapper
 
-- [ ] There are some link dbpedia which is broken: for example, http://dbpedia.org/resource/La_Belle_Assiette&chef_id, we cannot get any information from this link using the query.
+1. Navigate to the Directory where app.py is located, and execute python app.py, This command will start the development server. You can access the application at http://localhost:5000 in your web browser.
+
+2. If you have an IDE like VScode, you can directly run app.py.
