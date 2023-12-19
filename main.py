@@ -753,7 +753,6 @@ def get_dish_by_link(dish_url):
     SELECT ?name ?description ?image (GROUP_CONCAT(CONCAT(?ingredientName, " - ", ?ingredient); SEPARATOR=", ") AS ?ingredients) ?mainIngredient
     WHERE {{
         <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name;
-        a dbo:Food;
         dbo:thumbnail ?image.
         
         FILTER(LANG(?name) = "en")
