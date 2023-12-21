@@ -372,14 +372,14 @@ def get_ingredient_by_link(ingredient_url):
     if "results" in results and "bindings" in results["results"] and results["results"]["bindings"]:
         result = results["results"]["bindings"][0]
 
-        chef_info = {
+        ingredient_info = {
             'name': result["name"]["value"],
             'link': ingredient_url,
             'image': result["image"]["value"] if "image" in result else "",
             'description': result["description"]["value"] if "description" in result else '',
         }
 
-        return chef_info
+        return ingredient_info
     else:
         return None
 
@@ -396,13 +396,14 @@ def get_chef_by_link(chef_url):
 
     SELECT ?name ?description ?image ?birthPlace ?birthDate ?deathDate
     WHERE {{
-        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name;
-        dbo:birthPlace ?birthPlaceLink;
-        dbo:birthDate ?birthDate.
-        ?birthPlaceLink rdfs:label ?birthPlace.
+        <http://dbpedia.org/resource/{resource_identifier}> rdfs:label ?name.
         
         FILTER(LANG(?name) = "en")
 
+        OPTIONAL {{<http://dbpedia.org/resource/{resource_identifier}> dbo:birthPlace ?birthPlaceLink.
+                    ?birthPlaceLink rdfs:label ?birthPlace.
+        }}
+        OPTIONAL {{<http://dbpedia.org/resource/{resource_identifier}> dbo:birthDate ?birthDate.}} 
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:abstract ?description; dbo:thumbnail ?image. FILTER(LANG(?description) = "en")}}
         OPTIONAL {{ <http://dbpedia.org/resource/{resource_identifier}> dbo:deathDate ?deathDate.}}
     }}

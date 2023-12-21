@@ -85,6 +85,7 @@
                             <h2>Description</h2>
                             <p>{{ chef.description }}</p>
                             <br/>
+                            {% if chef.birthDate %}
                             <h2>Birth date</h2>
                             <p>
                                 {{ chef.birthDate }}
@@ -92,6 +93,7 @@
                                 (age {{ chef.age }})
                                 {% endif %}
                             </p>
+                            {% endif %}
 
                             {% if chef.deathDate %}
                             <br/>
