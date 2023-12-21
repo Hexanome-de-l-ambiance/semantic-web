@@ -127,13 +127,13 @@
 									{% for category in ["French_cuisine", "French_soups", "French_cakes",
 									"French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods",
 									"French_sandwiches", "French_desserts", "French_sausages", "French_stews",
-									"French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine",
+									"French_cheeses", "French_fusion_cuisine", "French_chefs",
 									"French_restaurants"] %}
 									<div class="checkbox-item">
 										<input type="checkbox" name="categories" value="{{ category }}"
 											id="{{ category }}">
 										<label for="{{ category }}">
-											{% if category != "Chefs_of_French_cuisine" %}
+											{% if category != "French_chefs" %}
 											{{ category.replace("French_", "").replace("_", " ") }}
 											{% else %}
 											{{ category.replace("_", " ") }}

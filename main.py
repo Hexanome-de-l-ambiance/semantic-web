@@ -9,7 +9,7 @@ from unidecode import unidecode
 
 
 all_categories = ["French_cuisine", "French_soups", "French_cakes", "French_breads", "French_meat_dishes", "French_pastries", "French_snacks_foods",
-                  "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "Chefs_of_French_cuisine", "French_restaurants"]
+                  "French_sandwiches", "French_desserts", "French_sausages", "French_stews", "French_cheeses", "French_fusion_cuisine", "French_chefs", "French_restaurants"]
 
 
 def get_list_french_dishes():
