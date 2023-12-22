@@ -1,7 +1,8 @@
-from flask import Flask, flash, redirect, url_for, render_template, request, send_from_directory, jsonify
+from flask import Flask, render_template, request, send_from_directory, jsonify
 from main import *
 
 app = Flask(__name__)
+
 
 @app.route('/')
 def hello_world():
@@ -23,11 +24,13 @@ def search():
     portions = split_list_into_portions(all_dishes)
     return render_template('results.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
+
 @app.route('/searchComplete', methods=['GET'])
 def searchComplete():
     search_query = request.args.get('q', '')
     selected_categories = request.args.getlist('categories')
-    all_dishes = complete_search_french_dishes(search_query, selected_categories)
+    all_dishes = complete_search_french_dishes(
+        search_query, selected_categories)
     return jsonify(all_dishes)
 
 
@@ -41,7 +44,7 @@ def random():
 def about_cuisine():
     dish_name = request.args.get('dish_link', '')
     dish = get_dish_by_link(dish_name)
-    reco = get_reco_by_link(dish_name)
+    reco = get_recommendation_by_link(dish_name)
     portions = split_reco_into_2_portions_of_length_3(reco)
     return render_template('about_cuisine.html', dish=dish, reco1=portions[0], reco2=portions[1])
 
@@ -87,9 +90,11 @@ def region():
 
     return render_template('region.html', portion1=portions[0], portion2=portions[1], portion3=portions[2], portion4=portions[3])
 
+
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory('static', filename)
+
 
 @app.route('/fetch-wikipedia-image')
 def fetch_wikipedia_image():
@@ -102,6 +107,7 @@ def fetch_wikipedia_image():
         return jsonify({'imageUrl': image_url})
     else:
         return jsonify({'imageUrl': 'static/images/placeholder_chef.png'})
+
 
 if __name__ == '__main__':
     app.run()
